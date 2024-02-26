@@ -1,6 +1,5 @@
-CHEN PINYEN
-109610025 nano
+PinYen-Chen,2rd member name 
+109610025 PinYen-Chen Nano
+312591041 ChihHsun-Lin ICST
 
-LIN CHIHHSUN  Second member
-312591041 icst
 
