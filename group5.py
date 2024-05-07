@@ -6,6 +6,7 @@ WHITE = (255, 255, 255)
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('Group 5 Final Project')
 clock = pygame.time.Clock()
 
 while True:
