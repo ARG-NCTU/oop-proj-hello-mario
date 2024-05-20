@@ -77,7 +77,7 @@ while running:
     camera_offset.y = 0 # Camera only moves in x direction
 
     # Draw everything
-    screen.fill(WHITE)
+    screen.fill((93, 147, 253))
 
     # Draw background with camera offset
     screen.blit(background, (-camera_offset.x, -camera_offset.y))
