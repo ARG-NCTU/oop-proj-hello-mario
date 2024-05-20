@@ -14,7 +14,7 @@ pygame.display.set_caption('Group 5 Final Project')
 clock = pygame.time.Clock()
 
 #jpg
-mario_jpg = pygame.image.load(os.path.join('img', 'mario.jpg')).convert()
+mario_jpg = pygame.image.load(os.path.join('img', 'mario1.png')).convert()
 background = pygame.image.load(os.path.join('img', 'background.png')).convert()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
@@ -34,7 +34,7 @@ class player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = pygame.transform.scale(mario_jpg,(120,62)) #import image
-        self.image.set_colorkey(WHITE) #set white background to transparent
+        self.image.set_colorkey(BLACK) #set white background to transparent
         self.rect = self.image.get_rect()  #get rectangle of image
         self.rect.center = (WIDTH/2, HEIGHT/2)
         self.speed = 5
