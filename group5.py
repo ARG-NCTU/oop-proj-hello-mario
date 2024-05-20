@@ -1,11 +1,13 @@
 import pygame
 import os
 
+
 FPS = 60
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 800, 600 #screen size
 WHITE = (255, 255, 255)
 BLACK = (0,0,0)
 
+#INITIALIZE PYGAME
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Group 5 Final Project')
