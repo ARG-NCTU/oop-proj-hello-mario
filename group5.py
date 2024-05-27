@@ -13,6 +13,7 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Group 5 Final Project')
 clock = pygame.time.Clock()
+GROUND_LEVEL = HEIGHT - 140
 
 #jpg
 mario_img = pygame.image.load(os.path.join('img', 'mario1.png')).convert()
@@ -38,8 +39,10 @@ class player(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(mario_img,(120,62)) #import image
         self.image.set_colorkey(BLACK) #set white background to transparent
         self.rect = self.image.get_rect()  #get rectangle of image
-        self.rect.center = (WIDTH/2, HEIGHT/2)
-        self.rect.y = HEIGHT - 62
+        self.rect.y = GROUND_LEVEL #get rectangle of image
+        self.rect.x = 10
+        #self.rect.center = (WIDTH/2, HEIGHT/2)
+        #self.rect.y = HEIGHT - 62
         self.speed = 5
         self.jump_speed = 10
         self.vel_y = 0 #initial vertical velocity
@@ -61,8 +64,8 @@ class player(pygame.sprite.Sprite):
         if not self.on_ground:
             self.vel_y += GRAVITY
             self.rect.y += self.vel_y
-            if self.rect.y > HEIGHT - 62:
-                self.rect.y = HEIGHT - 62
+            if self.rect.y > GROUND_LEVEL:
+                self.rect.y = GROUND_LEVEL
                 self.on_ground = True
                 self.vel_y = 0
                 self.image = pygame.transform.scale(mario_img,(120,62)) #import original image
