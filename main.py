@@ -1,19 +1,19 @@
 import pygame
 import os
 
-
+# Constants
 FPS = 60
-WIDTH, HEIGHT = 800, 600 #screen size
-GRAVITY = 0.2
+WIDTH, HEIGHT = 800, 600  # Screen size
 WHITE = (255, 255, 255)
-BLACK = (0,0,0)
+BLACK = (0, 0, 0)
+GRAVITY = 0.2
+GROUND_LEVEL = HEIGHT - 140
 
-#INITIALIZE PYGAME
+# Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Group 5 Final Project')
 clock = pygame.time.Clock()
-GROUND_LEVEL = HEIGHT - 140
 
 #jpg
 mario_img = pygame.image.load(os.path.join('img', 'mario1.png')).convert()
@@ -21,20 +21,17 @@ mario_jump_img = pygame.image.load(os.path.join('img', 'mario_jump.jpg')).conver
 background = pygame.image.load(os.path.join('img', 'background.png')).convert()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
-
-#transition of the screen
+# Transition of the screen
 def darken_screen():
     dark_img = screen.convert_alpha()
     for opacity in range(0, 255, 15):
         clock.tick(FPS)
         dark_img.fill((*BLACK, opacity))
-        screen.blit(dark_img, (0,0))
+        screen.blit(dark_img, (0, 0))
         pygame.display.update()
         pygame.time.delay(100)
 
-
-
-class player(pygame.sprite.Sprite):
+class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = pygame.transform.scale(mario_img,(120,62)) #import image
@@ -48,6 +45,7 @@ class player(pygame.sprite.Sprite):
         self.jump_speed = 10
         self.vel_y = 0 #initial vertical velocity
         self.on_ground = True #initialize jump to false
+
 
     def update(self):
         keys = pygame.key.get_pressed()
@@ -79,27 +77,40 @@ class player(pygame.sprite.Sprite):
         
             self.rect.right = 90
 
+# Create sprite group and player instance
 all_sprites = pygame.sprite.Group()
-player = player()
+player = Player()
 all_sprites.add(player)
 
+# Camera offset
+camera_offset = pygame.Vector2(0, 0)
 
+# Main game loop
 running = True
 while running:
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    # update
+
+    # Update sprites
     all_sprites.update()
 
+    # Update camera offset based on player movement
+    camera_offset.x = player.rect.centerx - WIDTH / 2
+ #   camera_offset.y = player.rect.centery - HEIGHT / 2 # Camera also moves in y direction
+    camera_offset.y = 0 # Camera only moves in x direction
 
-    #display
-    screen.fill(WHITE)
-    screen.blit(background, (0,0))
-    all_sprites.draw(screen) # Draw the group
+    # Draw everything
+    screen.fill((93, 147, 253))
+
+    # Draw background with camera offset
+    screen.blit(background, (-camera_offset.x, -camera_offset.y))
+
+    # Draw sprites with camera offset
+    for sprite in all_sprites:
+        screen.blit(sprite.image, sprite.rect.topleft - camera_offset)
 
     pygame.display.update()
 
 pygame.quit()
-    
