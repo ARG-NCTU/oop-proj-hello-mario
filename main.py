@@ -12,6 +12,8 @@ GROUND_LEVEL = HEIGHT - 150
 
 # Initialize Pygame
 pygame.init()
+pygame.mixer.init()
+
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Group 5 Final Project')
 clock = pygame.time.Clock()
@@ -22,6 +24,12 @@ mario_jump_img = pygame.image.load(os.path.join('img', 'mario_jump.jpg')).conver
 background = pygame.image.load(os.path.join('img', 'background.png')).convert()
 background = pygame.transform.scale(background, (3000, HEIGHT))
 coin_img = pygame.image.load(os.path.join('img', 'coin.png')).convert()
+
+#載入音樂
+background_sound = pygame.mixer.Sound(os.path.join('sound', 'background.mp3'))
+jump_sound = pygame.mixer.Sound(os.path.join('sound', 'jump.wav'))
+eatcoin_sound = pygame.mixer.Sound(os.path.join('sound', 'eatcoin.wav'))
+
 
 font_name = pygame.font.match_font('arial')
 def draw_text(surf, text, size, x, y):
@@ -57,7 +65,7 @@ class Coin(pygame.sprite.Sprite):
         self.coin_num = coin_num
 
     def update(self):
-        if self.rect.x<= 0 or self.rect.x >=WIDTH : #if coin reaches end of screen
+        if self.rect.x<= 0 or self.rect.x >=3000 : #if coin reaches end of screen
             self.kill()
 
 class Player(pygame.sprite.Sprite):
@@ -86,6 +94,7 @@ class Player(pygame.sprite.Sprite):
             #image jumps
             self.image = pygame.transform.scale(mario_jump_img,(55,71)) #import jump image
             self.image.set_colorkey(WHITE) #set white background to transparent
+            jump_sound.play()
             self.vel_y = -self.jump_speed
             self.on_ground = False
         #gravity
@@ -115,22 +124,26 @@ all_sprites.add(player)
 players.add(player)
 
 
-def create_coin(pre_start):
+def create_coin(existing_end_positions):
     type_num = random.randint(1,2)
     coin_num = random.randint(1,10)
-    if pre_start == 0:
-        coin_start = random.randrange(0,WIDTH-200)
-    else: coin_start = random.randrange(pre_start,WIDTH)
+    if existing_end_positions:
+        coin_start = max(existing_end_positions) + random.randint(50,150)
+    else: coin_start = random.randrange(0,WIDTH-200)
 
+    coin_end = coin_start + coin_num*80
+
+    #create coins
     for i in range(coin_num): #create 一組連續金幣
         coin_num = i+1
         coin = Coin(type_num,coin_num,coin_start)
         all_sprites.add(coin)
         coins.add(coin)
-    return coin_start
+    return coin_end
 
-pre_start = create_coin(0)
-create_coin(pre_start)
+coin_end_positions = [] #store the end positions of coins
+for i in range(5): #create 5 sets of coins
+    coin_end_positions.append(create_coin(coin_end_positions))
 
 # type_num = random.randint(1,2)
 # coin_num = random.randint(1,10)
@@ -170,6 +183,7 @@ while running:
     eat_coin = pygame.sprite.groupcollide(players, coins, False, True) #if player collides with coin, kill coin
 
     for eat in eat_coin: #if player collides with coin, score +1
+        eatcoin_sound.play()
         score += 1
         print(score)
 
@@ -189,7 +203,8 @@ while running:
     for sprite in all_sprites:
         screen.blit(sprite.image, sprite.rect.topleft - camera_offset)
 
-    draw_text(screen, 'score is: '+ str(score), 18, WIDTH / 2, 10)
+    draw_text(screen, 'score is: '+ str(score), 18, WIDTH / 2, 10) #分數顯示在最上層
+    #background_sound.play()
     pygame.display.update()
 
 pygame.quit()
