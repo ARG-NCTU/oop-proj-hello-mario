@@ -144,6 +144,31 @@ class Enemy1(pygame.sprite.Sprite):
             
         if self.rect.right >= self.right_bound or self.rect.left <= self.left_bound:
             self.direction *= -1  # Reverse direction if hitting the boundary
+class Enemy2(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image_right = pygame.transform.scale(enemy2_img, (40, 40))
+        self.image_right.set_colorkey(BLACK)
+        self.image_left = pygame.transform.scale(enemy1_img, (40, 40))
+        self.image_left.set_colorkey(BLACK)
+        self.image = self.image_right  # Initial image set to right
+        self.rect = self.image.get_rect()
+        self.rect.y = GROUND_LEVEL + 20  # Set the enemy to the same level as Mario
+        self.rect.x = WIDTH - self.rect.width-100 # Start at the rightmost side 100
+        self.speed = 3 # Fixed speed
+        self.direction = -1  # Move left
+        self.left_bound = self.rect.x - 50  # Left bound of movement range
+        self.right_bound = self.rect.x + 50  # Right bound of movement range
+
+    def update(self):
+        self.rect.x += self.speed * self.direction
+        if self.direction == 1:  # Moving right
+            self.image = self.image_right
+        else:  # Moving left
+            self.image = self.image_left
+
+        if self.rect.right >= self.right_bound or self.rect.left <= self.left_bound:
+            self.direction *= -1  # Reverse direction if hitting the boundary
 
 class FlyingTurtle(pygame.sprite.Sprite):
     def __init__(self):
@@ -182,9 +207,13 @@ all_sprites.add(player)
 # Create initial enemy
 enemy1 = Enemy1()
 flying_turtle = FlyingTurtle()
+enemy2 = Enemy2()  # Create the new enemy
 all_sprites.add(enemy1)
 all_sprites.add(flying_turtle)
+all_sprites.add(enemy2)  # Add the new enemy to the group
 enemies.add(enemy1)
+enemies.add(enemy2)  # Add the new enemy to the enemies group
+
 
 # Main game loop
 running = True
