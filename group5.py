@@ -3,7 +3,7 @@ import os
 
 FPS = 60
 WIDTH, HEIGHT = 800, 600  # screen size
-GRAVITY = 0.5
+GRAVITY = 0.3
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
