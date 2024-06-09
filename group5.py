@@ -9,6 +9,7 @@ BLACK = (0, 0, 0)
 
 # INITIALIZE PYGAME
 pygame.init()
+pygame.mixer.init()  # Initialize the mixer for sound
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Group 5 Final Project')
 clock = pygame.time.Clock()
@@ -17,8 +18,12 @@ GROUND_LEVEL = HEIGHT - 140
 # Load images
 mario_img = pygame.image.load(os.path.join('img', 'mario1.png')).convert()
 mario_jump_img = pygame.image.load(os.path.join('img', 'mario_jump.jpg')).convert()
+enemy1_img = pygame.image.load(os.path.join('img', 'enemy.png')).convert()
 background = pygame.image.load(os.path.join('img', 'background.png')).convert()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+
+# Load sounds
+gameover_sound = pygame.mixer.Sound(os.path.join('sound', 'gameover.ogg'))
 
 # Transition of the screen
 def darken_screen():
@@ -29,6 +34,17 @@ def darken_screen():
         screen.blit(dark_img, (0, 0))
         pygame.display.update()
         pygame.time.delay(100)
+
+# Display Game Over message
+def show_game_over():
+    gameover_sound.play()  # Play game over sound
+    pygame.time.delay(500)  # Delay to ensure the sound plays fully
+    font = pygame.font.SysFont(None, 74)
+    text = font.render('GAME OVER', True, BLACK)
+    text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+    screen.blit(text, text_rect)
+    pygame.display.update()
+    pygame.time.delay(2000)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -84,21 +100,56 @@ class Player(pygame.sprite.Sprite):
             darken_screen()
             self.rect.right = 90
 
+class Enemy1(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.transform.scale(enemy1_img, (40, 40))
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.y = GROUND_LEVEL + 20  # Set the enemy to the same level as Mario
+        self.rect.x = WIDTH - self.rect.width  # Start at the right edge
+        self.speed = 2  # Fixed speed
+        self.direction = -1  # Move left
+
+    def update(self):
+        self.rect.x += self.speed * self.direction
+        if self.rect.right < 0:  # Reset to the right edge if it goes off the left side
+            self.rect.x = WIDTH - self.rect.width
+
+# Sprite groups
 all_sprites = pygame.sprite.Group()
+enemies = pygame.sprite.Group()
+
+# Create player
 player = Player()
 all_sprites.add(player)
 
+# Create initial enemy
+enemy1 = Enemy1()
+all_sprites.add(enemy1)
+enemies.add(enemy1)
+
+# Main game loop
 running = True
+game_over = False
 while running:
     clock.tick(FPS)
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+    
+    if not game_over:
+        # Update
+        all_sprites.update()
+    
+        # Check for collisions
+        if pygame.sprite.spritecollideany(player, enemies):
+            game_over = True
+            show_game_over()
+            running = False
 
-    # update
-    all_sprites.update()
-
-    # display
+    # Display
     screen.fill(WHITE)
     screen.blit(background, (0, 0))
     all_sprites.draw(screen)  # Draw the group
