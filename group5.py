@@ -16,14 +16,20 @@ clock = pygame.time.Clock()
 GROUND_LEVEL = HEIGHT - 140
 
 # Load images
-mario_img = pygame.image.load(os.path.join('img', 'mario1.png')).convert()
-mario_jump_img = pygame.image.load(os.path.join('img', 'mario_jump.jpg')).convert()
-enemy1_img = pygame.image.load(os.path.join('img', 'enemy.png')).convert()
+Right_mario_img = pygame.image.load(os.path.join('img', 'Right_mario1.png')).convert()
+Left_mario_img = pygame.image.load(os.path.join('img', 'Left_mario1.png')).convert()
+Right_mario_jump_img = pygame.image.load(os.path.join('img', 'Right_mario_jump.jpg')).convert()
+Left_mario_jump_img = pygame.image.load(os.path.join('img', 'Left_mario_jump.jpg')).convert()
+enemy1_img = pygame.image.load(os.path.join('img', 'Left_enemy.png')).convert()
+enemy2_img = pygame.image.load(os.path.join('img', 'Right_enemy.png')).convert()
+Right_flying_turtle=pygame.image.load(os.path.join('img', 'Right_flying_turtle.png')).convert()
+Left_flying_turtle=pygame.image.load(os.path.join('img', 'Left_flying_turtle.png')).convert()
 background = pygame.image.load(os.path.join('img', 'background.png')).convert()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-
 # Load sounds
 gameover_sound = pygame.mixer.Sound(os.path.join('sound', 'gameover.ogg'))
+jump_sound = pygame.mixer.Sound(os.path.join('sound', 'jump.ogg'))  # Load jump sound
+pygame.mixer.music.load(os.path.join('sound', 'background.ogg'))
 
 # Transition of the screen
 def darken_screen():
@@ -49,9 +55,12 @@ def show_game_over():
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.transform.scale(mario_img, (120, 62))  # import image
-        self.image.set_colorkey(BLACK)  # set black background to transparent
-        self.rect = self.image.get_rect()  # get rectangle of image
+        self.image_right = pygame.transform.scale(Right_mario_img, (55, 62))
+        self.image_right.set_colorkey(BLACK)
+        self.image_left = pygame.transform.scale(Left_mario_img, (55, 62))
+        self.image_left.set_colorkey(BLACK)
+        self.image = self.image_right  # Initial image set to right
+        self.rect = self.image.get_rect()
         self.rect.y = GROUND_LEVEL  # initial y position
         self.rect.x = 10
         self.speed = 5
@@ -63,11 +72,18 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             self.rect.x -= self.speed
+            self.image = self.image_left
         if keys[pygame.K_RIGHT]:
             self.rect.x += self.speed
+            self.image = self.image_right
         if keys[pygame.K_UP] and self.on_ground:  # if on ground and up key is pressed
+            # Play jump sound
+            jump_sound.play()
             # image jumps
-            self.image = pygame.transform.scale(mario_jump_img, (55, 62))  # import jump image
+            if self.image == self.image_right:
+                self.image = pygame.transform.scale(Right_mario_jump_img, (55, 62))  # import jump image
+            else:
+                self.image = pygame.transform.scale(Left_mario_jump_img, (55, 62))  # import jump image
             self.image.set_colorkey(WHITE)  # set white background to transparent
             self.vel_y = -self.jump_speed
             self.on_ground = False
@@ -80,7 +96,10 @@ class Player(pygame.sprite.Sprite):
                 self.rect.y = GROUND_LEVEL
                 self.on_ground = True
                 self.vel_y = 0
-                self.image = pygame.transform.scale(mario_img, (120, 62))  # import original image
+                if self.image == self.image_right:
+                    self.image = pygame.transform.scale(Right_mario_img, (55, 62))  # import original image
+                else:
+                    self.image = pygame.transform.scale(Left_mario_img, (55, 62))  # import original image
                 self.image.set_colorkey(BLACK)  # set black background to transparent
 
         if keys[pygame.K_DOWN] and self.on_ground:
@@ -103,18 +122,79 @@ class Player(pygame.sprite.Sprite):
 class Enemy1(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.transform.scale(enemy1_img, (40, 40))
-        self.image.set_colorkey(BLACK)
+        self.image_right = pygame.transform.scale(enemy2_img, (40, 40))
+        self.image_right.set_colorkey(BLACK)
+        self.image_left = pygame.transform.scale(enemy1_img, (40, 40))
+        self.image_left.set_colorkey(BLACK)
+        self.image = self.image_right  # Initial image set to right
         self.rect = self.image.get_rect()
         self.rect.y = GROUND_LEVEL + 20  # Set the enemy to the same level as Mario
-        self.rect.x = WIDTH - self.rect.width  # Start at the right edge
+        self.rect.x = WIDTH // 2 - self.rect.width // 2  # Start at the center of the screen
         self.speed = 2  # Fixed speed
         self.direction = -1  # Move left
+        self.left_bound = self.rect.x - 100  # Left bound of movement range
+        self.right_bound = self.rect.x + 100  # Right bound of movement range
 
     def update(self):
         self.rect.x += self.speed * self.direction
-        if self.rect.right < 0:  # Reset to the right edge if it goes off the left side
-            self.rect.x = WIDTH - self.rect.width
+        if self.direction == 1:  # Moving right
+            self.image = self.image_right
+        else:  # Moving left
+            self.image = self.image_left
+            
+        if self.rect.right >= self.right_bound or self.rect.left <= self.left_bound:
+            self.direction *= -1  # Reverse direction if hitting the boundary
+class Enemy2(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image_right = pygame.transform.scale(enemy2_img, (40, 40))
+        self.image_right.set_colorkey(BLACK)
+        self.image_left = pygame.transform.scale(enemy1_img, (40, 40))
+        self.image_left.set_colorkey(BLACK)
+        self.image = self.image_right  # Initial image set to right
+        self.rect = self.image.get_rect()
+        self.rect.y = GROUND_LEVEL + 20  # Set the enemy to the same level as Mario
+        self.rect.x = WIDTH - self.rect.width-100 # Start at the rightmost side 100
+        self.speed = 3 # Fixed speed
+        self.direction = -1  # Move left
+        self.left_bound = self.rect.x - 50  # Left bound of movement range
+        self.right_bound = self.rect.x + 50  # Right bound of movement range
+
+    def update(self):
+        self.rect.x += self.speed * self.direction
+        if self.direction == 1:  # Moving right
+            self.image = self.image_right
+        else:  # Moving left
+            self.image = self.image_left
+
+        if self.rect.right >= self.right_bound or self.rect.left <= self.left_bound:
+            self.direction *= -1  # Reverse direction if hitting the boundary
+
+class FlyingTurtle(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image_right = pygame.transform.scale(Right_flying_turtle, (55, 62))
+        self.image_right.set_colorkey(BLACK)
+        self.image_left = pygame.transform.scale(Left_flying_turtle, (55, 62))
+        self.image_left.set_colorkey(BLACK)
+        self.image = self.image_right  # Initial image set to right
+        self.rect = self.image.get_rect()
+        self.rect.y = GROUND_LEVEL - 90  # Set the initial y position
+        self.rect.x = WIDTH // 2 - self.rect.width // 2  # Start at the center of the screen
+        self.speed = 2  # Fixed speed
+        self.direction = -1  # Move left
+        self.left_bound = self.rect.x - 200  # Left bound of movement range
+        self.right_bound = self.rect.x + 200  # Right bound of movement range
+
+    def update(self):
+        self.rect.x += self.speed * self.direction
+        if self.direction == 1:  # Moving right
+            self.image = self.image_right
+        else:  # Moving left
+            self.image = self.image_left
+
+        if self.rect.right >= self.right_bound or self.rect.left <= self.left_bound:
+            self.direction *= -1  # Reverse direction if hitting the boundary
 
 # Sprite groups
 all_sprites = pygame.sprite.Group()
@@ -126,11 +206,19 @@ all_sprites.add(player)
 
 # Create initial enemy
 enemy1 = Enemy1()
+flying_turtle = FlyingTurtle()
+enemy2 = Enemy2()  # Create the new enemy
 all_sprites.add(enemy1)
+all_sprites.add(flying_turtle)
+all_sprites.add(enemy2)  # Add the new enemy to the group
 enemies.add(enemy1)
+enemies.add(enemy2)  # Add the new enemy to the enemies group
+
 
 # Main game loop
 running = True
+pygame.mixer.music.play(-1)  # Loop infinitely
+
 game_over = False
 while running:
     clock.tick(FPS)
@@ -156,4 +244,5 @@ while running:
 
     pygame.display.update()
 
+pygame.mixer.music.stop()
 pygame.quit()
