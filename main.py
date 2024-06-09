@@ -24,12 +24,14 @@ mario_jump_img = pygame.image.load(os.path.join('img', 'mario_jump.jpg')).conver
 background = pygame.image.load(os.path.join('img', 'background.png')).convert()
 background = pygame.transform.scale(background, (3000, HEIGHT))
 coin_img = pygame.image.load(os.path.join('img', 'coin.png')).convert()
+enemy1_img = pygame.image.load(os.path.join('img', 'enemy.png')).convert()
+flag_img = pygame.image.load(os.path.join('img', 'mario_flag.png')).convert()
 
 #載入音樂
 background_sound = pygame.mixer.Sound(os.path.join('sound', 'background.mp3'))
 jump_sound = pygame.mixer.Sound(os.path.join('sound', 'jump.wav'))
 eatcoin_sound = pygame.mixer.Sound(os.path.join('sound', 'eatcoin.wav'))
-
+gameover_sound = pygame.mixer.Sound(os.path.join('sound', 'gameover.ogg'))
 
 font_name = pygame.font.match_font('arial')
 def draw_text(surf, text, size, x, y):
@@ -49,6 +51,17 @@ def darken_screen():
         screen.blit(dark_img, (0, 0))
         pygame.display.update()
         pygame.time.delay(100)
+
+# Display Game Over message
+def show_game_over():
+    gameover_sound.play()  # Play game over sound
+    pygame.time.delay(500)  # Delay to ensure the sound plays fully
+    font = pygame.font.SysFont(None, 74)
+    text = font.render('GAME OVER', True, BLACK)
+    text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+    screen.blit(text, text_rect)
+    pygame.display.update()
+    pygame.time.delay(2000)
 
 class Coin(pygame.sprite.Sprite):
     def __init__(self,type,coin_num,coin_start):
@@ -86,6 +99,9 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         keys = pygame.key.get_pressed()
+        self.flag1 = True
+        self.flag2 = True
+
         if keys[pygame.K_LEFT]:
             self.rect.x -= self.speed
         if keys[pygame.K_RIGHT]:
@@ -110,19 +126,55 @@ class Player(pygame.sprite.Sprite):
 
         if keys[pygame.K_DOWN]:
             self.rect.y += self.speed
-        if self.rect.left > 3000: #let 3000 be the end of the game
+        if self.rect.left > 2900 and self.flag1: #let 3000 be the end of the game 1 
+            self.flag1 = False
             darken_screen()
             self.rect.right = 90
 
+
+class Enemy1(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.transform.scale(enemy1_img, (40, 40))
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.y = GROUND_LEVEL + 20  # Set the enemy to the same level as Mario
+        self.rect.x = WIDTH - self.rect.width  # Start at the right edge
+        self.speed = 2  # Fixed speed
+        self.direction = -1  # Move left
+
+    def update(self):
+        self.rect.x += self.speed * self.direction
+        if self.rect.right < 0:  # Reset to the right edge if it goes off the left side
+            self.rect.x = WIDTH - self.rect.width
+
+class Flag(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.transform.scale(flag_img, (131, 300))
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.y = GROUND_LEVEL - 230  # Set the enemy to the same level as Mario
+        self.rect.x = 2900  # Start at the right edge
+
+
 # Create sprite group and player instance
 all_sprites = pygame.sprite.Group()
+
 coins = pygame.sprite.Group()
 players = pygame.sprite.Group()
+enemies = pygame.sprite.Group()
 
+flags = Flag()
 player = Player()
 all_sprites.add(player)
+all_sprites.add(flags)
 players.add(player)
 
+# Create initial enemy
+enemy1 = Enemy1()
+all_sprites.add(enemy1)
+enemies.add(enemy1)
 
 def create_coin(existing_end_positions):
     type_num = random.randint(1,2)
@@ -170,16 +222,26 @@ score = 0
 # Camera offset
 camera_offset = pygame.Vector2(0, 0)
 
+
 # Main game loop
 running = True
+game_over = False
 while running:
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+    
+    if not game_over:
+        # Update
+        all_sprites.update()
+    
+        # Check for collisions
+        if pygame.sprite.spritecollideany(player, enemies):
+            game_over = True
+            show_game_over()
+            running = False
 
-    # Update sprites
-    all_sprites.update()
     eat_coin = pygame.sprite.groupcollide(players, coins, False, True) #if player collides with coin, kill coin
 
     for eat in eat_coin: #if player collides with coin, score +1
@@ -193,6 +255,7 @@ while running:
     camera_offset.y = 0 # Camera only moves in x direction
 
     # Draw everything
+    
     screen.fill((93, 147, 253))
     
 
