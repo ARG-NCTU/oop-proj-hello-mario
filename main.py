@@ -1,6 +1,8 @@
 import pygame
 import os
 import random
+from os.path import isfile, join
+
 
 # Constants
 FPS = 60
@@ -284,6 +286,50 @@ class Flag(pygame.sprite.Sprite):
         self.rect.y = GROUND_LEVEL - 230
         self.rect.x = 2900
 
+
+class Object(pygame.sprite.Sprite):
+    def __init__(self, x, y, width, height, name=None):
+        super().__init__()
+        self.rect = pygame.Rect(x, y, width, height)
+        self.image = pygame.Surface((width, height), pygame.SRCALPHA)
+        self.width = width
+        self.height = height
+        self.name = name
+
+def get_block(width, height, scale=1.5):
+    path = join('img', 'brick_with_grass_resized.png')  # size = 64, 54
+    img = pygame.image.load(path).convert_alpha()
+    img.set_colorkey((255, 255, 255))
+    
+    # Resize the image
+    new_height = int(height * scale)
+    new_width = width  # Assuming we only scale the height
+    resized_img = pygame.transform.scale(img, (new_width, new_height))
+    
+    surface = pygame.Surface((new_width, new_height), pygame.SRCALPHA, 32)
+    surface.blit(resized_img, (0, 0))
+    surface.set_colorkey((255, 255, 255))  # Set the colorkey again after resizing
+    return surface
+
+class Block(Object):
+    def __init__(self, x, y, width, height, scale=1.5, name=None):
+        super().__init__(x, y, width, int(height * scale), name)
+        block = get_block(width, height, scale)
+        self.image.blit(block, (0, 0))
+        self.mask = pygame.mask.from_surface(self.image)
+
+# Constants
+WIDTH, HEIGHT = 800, 600  # Set your screen width and height
+block_width, block_height = 64, 54  # Original block dimensions
+scale = 1.5  # Scale factor
+
+# Create the floor
+floor = [
+    Block(i * block_width, HEIGHT - int(block_height * scale), block_width, block_height, scale)
+    for i in range(-WIDTH // block_width, (WIDTH * 4) // block_width)
+]
+# Create sprite group and player instance
+
 class GoldBrick(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -294,11 +340,17 @@ class GoldBrick(pygame.sprite.Sprite):
         self.rect.y = y
 
 # Create sprite groups
+
 all_sprites = pygame.sprite.Group()
 coins = pygame.sprite.Group()
 players = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
+
+terrain = pygame.sprite.Group()
+all_sprites.add(floor)
+
 gold_bricks = pygame.sprite.Group()
+
 
 # Create flag
 flag = Flag()
