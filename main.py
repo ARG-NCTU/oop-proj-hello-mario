@@ -407,6 +407,7 @@ for i in range(num_bricks):
     gold_bricks.add(brick)
 
 score = 0
+# Camera offset
 camera_offset = pygame.Vector2(0, 0)
 
 # Main game loop
@@ -439,8 +440,10 @@ while running:
     camera_offset.y = 0
 
     screen.fill((93, 147, 253))
+    #draw background with camera offset
     screen.blit(background, (-camera_offset.x, -camera_offset.y))
 
+    #draw sprites with camera offset
     for sprite in all_sprites:
         screen.blit(sprite.image, sprite.rect.topleft - camera_offset)
 
