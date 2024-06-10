@@ -223,6 +223,31 @@ class Enemy2(pygame.sprite.Sprite):
 
         if self.rect.right >= self.right_bound or self.rect.left <= self.left_bound:
             self.direction *= -1
+class Enemy3(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image_right = pygame.transform.scale(enemy2_img, (40, 40))
+        self.image_right.set_colorkey(BLACK)
+        self.image_left = pygame.transform.scale(enemy1_img, (40, 40))
+        self.image_left.set_colorkey(BLACK)
+        self.image = self.image_right
+        self.rect = self.image.get_rect()
+        self.rect.y = GROUND_LEVEL + 20
+        self.rect.x = WIDTH//2  #plact it to the middle of background
+        self.speed = 3
+        self.direction = -1
+        self.left_bound = self.rect.x - 200
+        self.right_bound = self.rect.x + 200
+
+    def update(self):
+        self.rect.x += self.speed * self.direction
+        if self.direction == 1:
+            self.image = self.image_right
+        else:
+            self.image = self.image_left
+
+        if self.rect.right >= self.right_bound or self.rect.left <= self.left_bound:
+            self.direction *= -1
 
 class FlyingTurtle(pygame.sprite.Sprite):
     def __init__(self):
@@ -237,8 +262,8 @@ class FlyingTurtle(pygame.sprite.Sprite):
         self.rect.x = WIDTH // 2 - self.rect.width // 2
         self.speed = 2
         self.direction = -1
-        self.left_bound = self.rect.x - 200
-        self.right_bound = self.rect.x + 200
+        self.left_bound = self.rect.x - 400
+        self.right_bound = self.rect.x + 400
 
     def update(self):
         self.rect.x += self.speed * self.direction
@@ -282,13 +307,16 @@ all_sprites.add(flag)
 # Create enemies
 enemy1 = Enemy1()
 enemy2 = Enemy2()
+enemy3 = Enemy3()
 flying_turtle = FlyingTurtle()
 all_sprites.add(enemy1)
 all_sprites.add(enemy2)
+all_sprites.add(enemy3)
 all_sprites.add(flying_turtle)
 all_sprites.add(gold_bricks)
 enemies.add(enemy1)
 enemies.add(enemy2)
+enemies.add(enemy3)
 enemies.add(flying_turtle)
 
 # Create player
@@ -329,6 +357,7 @@ for i in range(num_bricks):
 score = 0
 camera_offset = pygame.Vector2(0, 0)
 
+# Main game loop
 # Main game loop
 running = True
 game_over = False
