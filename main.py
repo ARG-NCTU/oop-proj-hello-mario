@@ -29,8 +29,8 @@ enemy1_img = pygame.image.load(os.path.join('img', 'Left_enemy.png')).convert()
 enemy2_img = pygame.image.load(os.path.join('img', 'Right_enemy.png')).convert()
 Right_flying_turtle = pygame.image.load(os.path.join('img', 'Right_flying_turtle.png')).convert()
 Left_flying_turtle = pygame.image.load(os.path.join('img', 'Left_flying_turtle.png')).convert()
-background = pygame.image.load(os.path.join('img', 'background.png')).convert()
-background = pygame.transform.scale(background, (3000, HEIGHT))
+#background = pygame.image.load(os.path.join('img', 'background.png')).convert()
+#background = pygame.transform.scale(background, (3000, HEIGHT))
 coin_img = pygame.image.load(os.path.join('img', 'coin.png')).convert()
 flag_img = pygame.image.load(os.path.join('img', 'mario_flag.png')).convert()
 gold_brick_img = pygame.image.load(os.path.join('img', 'gold_brick.png')).convert()
@@ -441,7 +441,7 @@ while running:
 
     screen.fill((93, 147, 253))
     #draw background with camera offset
-    screen.blit(background, (-camera_offset.x, -camera_offset.y))
+    #screen.blit(background, (-camera_offset.x, -camera_offset.y))
 
     #draw sprites with camera offset
     for sprite in all_sprites:
