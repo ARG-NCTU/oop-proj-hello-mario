@@ -96,22 +96,26 @@ class Player(pygame.sprite.Sprite):
         self.image_left.set_colorkey(BLACK)
         self.image = self.image_right  # Initial image set to right
         self.rect = self.image.get_rect()
-        self.rect.y = GROUND_LEVEL #get rectangle of image
+        self.rect.y = GROUND_LEVEL  # Get rectangle of image
         self.rect.x = 10
-        #self.rect.center = (WIDTH/2, HEIGHT/2)
-        #self.rect.y = HEIGHT - 62
         self.speed = 5
         self.jump_speed = 10
-        self.vel_y = 0 #initial vertical velocity
-        self.on_ground = True #initialize jump to false
-
+        self.vel_y = 0  # Initial vertical velocity
+        self.on_ground = True  # Initialize jump to false
 
     def update(self):
         keys = pygame.key.get_pressed()
+
+        # Flag variables to ensure certain actions are executed only once
         self.flag1 = True
         self.flag2 = True
 
         if keys[pygame.K_LEFT]:
+            if self.rect.x < -50:
+                # Player goes too far to the left, initiate fast descent
+                show_game_over()  # Show game over message
+                pygame.mixer.stop()  # Stop playing music
+                pygame.quit()  # Quit the game
             self.rect.x -= self.speed
             self.image = self.image_left
         if keys[pygame.K_RIGHT]:
@@ -143,6 +147,8 @@ class Player(pygame.sprite.Sprite):
                 self.image.set_colorkey(BLACK) #set white background to transparent
 
         if keys[pygame.K_DOWN]:
+            if self.rect.y > GROUND_LEVEL:  # Preventing the player from moving below the ground level
+                self.rect.y = GROUND_LEVEL
             self.rect.y += self.speed
         if self.rect.left > 2900 and self.flag1: #let 3000 be the end of the game 1 
             self.flag1 = False
@@ -261,7 +267,9 @@ enemies.add(enemy1)
 enemy2 = Enemy2()  # Create the new enemy
 all_sprites.add(enemy2)
 enemies.add(enemy2)  # Add the new enemy to the enemies group
-
+enemy3=FlyingTurtle()
+all_sprites.add(enemy3)
+enemies.add(enemy3)
 def create_coin(existing_end_positions):
     type_num = random.randint(1,2)
     coin_num = random.randint(1,10)

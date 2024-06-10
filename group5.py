@@ -206,13 +206,16 @@ all_sprites.add(player)
 
 # Create initial enemy
 enemy1 = Enemy1()
+turtle=FlyingTurtle()
 flying_turtle = FlyingTurtle()
 enemy2 = Enemy2()  # Create the new enemy
 all_sprites.add(enemy1)
-all_sprites.add(flying_turtle)
+all_sprites.add(turtle)
 all_sprites.add(enemy2)  # Add the new enemy to the group
 enemies.add(enemy1)
 enemies.add(enemy2)  # Add the new enemy to the enemies group
+enemies.add(turtle)
+
 
 
 # Main game loop
