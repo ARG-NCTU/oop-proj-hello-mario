@@ -70,6 +70,15 @@ def show_game_over():
     pygame.display.update()
     pygame.time.delay(2000)
 
+def show_level(level_index):
+    #pygame.time.delay(500)
+    font = pygame.font.SysFont(None, 74)
+    text = font.render('Level '+ str(level_index+1), True, WHITE)
+    text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+    screen.blit(text, text_rect)
+    pygame.display.update()
+    pygame.time.delay(2000)
+
 class Coin(pygame.sprite.Sprite):
     def __init__(self, type, coin_num, coin_start):
         super().__init__()
@@ -103,6 +112,7 @@ class Player(pygame.sprite.Sprite):
         self.jump_speed = 10
         self.vel_y = 0
         self.on_ground = True
+        self.score = 0
 
     def update(self):
         keys = pygame.key.get_pressed()
@@ -148,9 +158,11 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left > 2900:
             darken_screen()
             self.rect.right = 90
+            load_next_level()
 
         self.collide_with_bricks()
         self.collide_with_skystage()
+        self.eat_coin()
 
     def collide_with_bricks(self):
         collisions = pygame.sprite.spritecollide(self, gold_bricks, False)
@@ -182,6 +194,14 @@ class Player(pygame.sprite.Sprite):
             elif self.vel_y < 0:  # Jumping up
                 self.rect.top = brick.rect.bottom
                 self.vel_y = 0
+    def eat_coin(self):
+        collisions = pygame.sprite.spritecollide(self, coins, True)
+        for coin in collisions:
+            #coin.kill()
+            eatcoin_sound.play()
+            self.score += 1
+            pre_score = self.score
+            print(self.score)
 
 class Enemy1(pygame.sprite.Sprite):
     def __init__(self):
@@ -192,7 +212,7 @@ class Enemy1(pygame.sprite.Sprite):
         self.image_left.set_colorkey(BLACK)
         self.image = self.image_right
         self.rect = self.image.get_rect()
-        self.rect.y = GROUND_LEVEL + 20
+        self.rect.y = GROUND_LEVEL + 35
         self.rect.x = WIDTH // 2 - self.rect.width // 2
         self.speed = 2
         self.direction = -1
@@ -218,7 +238,7 @@ class Enemy2(pygame.sprite.Sprite):
         self.image_left.set_colorkey(BLACK)
         self.image = self.image_right
         self.rect = self.image.get_rect()
-        self.rect.y = GROUND_LEVEL + 20
+        self.rect.y = GROUND_LEVEL + 35
         self.rect.x = WIDTH - self.rect.width - 100
         self.speed = 3
         self.direction = -1
@@ -243,7 +263,7 @@ class Enemy3(pygame.sprite.Sprite):
         self.image_left.set_colorkey(BLACK)
         self.image = self.image_right
         self.rect = self.image.get_rect()
-        self.rect.y = GROUND_LEVEL + 20
+        self.rect.y = GROUND_LEVEL + 35
         self.rect.x = WIDTH//2  #plact it to the middle of background
         self.speed = 3
         self.direction = -1
@@ -384,7 +404,7 @@ flag = Flag(0)
 all_sprites.add(flag)
 
 # Create clouds
-for i in range(5):
+for i in range(8):
     cloud = Cloud()
     all_sprites.add(cloud)
     clouds.add(cloud)
@@ -455,11 +475,98 @@ create_floating_block(1500)
 create_floating_block(2000)
 create_floating_block(2500)
 
+
+# Define levels
+levels = [
+    {
+        'enemies': [Enemy1()],
+        'flying_turtles': [FlyingTurtle()],
+        'gold_bricks': [(x, GROUND_LEVEL - 150) for x in range(100, 800, 100)],
+        'skystage': [(x, GROUND_LEVEL - 200) for x in range(100, 800, 200)],
+        'flag': [Flag(0), Flag(2900)],
+    },
+    # More levels can be added here
+    {
+        'enemies': [Enemy1()],
+        'flying_turtles': [FlyingTurtle()],
+        'gold_bricks': [(x, GROUND_LEVEL - 50) for x in range(100, 800, 100)],
+        'skystage': [(x, GROUND_LEVEL - 200) for x in range(100, 800, 200)],
+        'flag': [Flag(0), Flag(2900)],
+    },
+        {
+        'enemies': [Enemy1()],
+        'flying_turtles': [FlyingTurtle()],
+        'gold_bricks': [(x, GROUND_LEVEL - 50) for x in range(100, 800, 100)],
+        'skystage': [(x, GROUND_LEVEL - 200) for x in range(100, 800, 200)],
+        'flag': [Flag(0), Flag(2900)],
+    },
+]
+
+current_level = 0
+show_level(current_level)
+def load_level(level_index,pre_score):
+    global player, all_sprites, enemies, coins, gold_bricks, skystage
+
+    all_sprites.empty()
+    enemies.empty()
+    coins.empty()
+    gold_bricks.empty()
+    skystage.empty()
+
+    # Create the floor
+    floor = [
+        Block(i * block_width, HEIGHT - int(block_height * scale), block_width, block_height, scale)
+        for i in range(-WIDTH // block_width, (WIDTH * 4) // block_width)
+    ]
+    all_sprites.add(floor)
+    level_data = levels[level_index]
+    coin_end_positions = []
+    for i in range(5):
+        coin_end_positions.append(create_coin(coin_end_positions))
+
+    for enemy in level_data['enemies']:
+        all_sprites.add(enemy)
+        enemies.add(enemy)
+    for flying_turtle in level_data['flying_turtles']:
+        all_sprites.add(flying_turtle)
+        enemies.add(flying_turtle)
+    for x, y in level_data['gold_bricks']:
+        brick = GoldBrick(x, y)
+        all_sprites.add(brick)
+        gold_bricks.add(brick)
+    for x, y in level_data['skystage']:
+        sky = Block(x, y, block_width, block_height, scale)
+        all_sprites.add(sky)
+        skystage.add(sky)
+    all_sprites.add(level_data['flag'])
+
+    # Create clouds
+    for i in range(8):
+        cloud = Cloud()
+        all_sprites.add(cloud)
+        clouds.add(cloud)
+
+    player = Player()
+    player.score = pre_score
+    all_sprites.add(player)
+    show_level(level_index)
+
+
+def load_next_level():
+    global current_level
+    print (current_level)
+    current_level += 1
+    if current_level >= len(levels):
+        show_game_over()
+        pygame.quit()
+    else:
+        load_level(current_level,pre_score=player.score)
+
+
 score = 0
 # Camera offset
 camera_offset = pygame.Vector2(0, 0)
 
-# Main game loop
 # Main game loop
 running = True
 game_over = False
@@ -478,12 +585,12 @@ while running:
             show_game_over()
             running = False
 
-    eat_coin = pygame.sprite.groupcollide(players, coins, False, True)
+    #eat_coin = pygame.sprite.groupcollide(players, coins, False, True)
 
-    for eat in eat_coin:
-        eatcoin_sound.play()
-        score += 1
-        print(score)
+    # for eat in eat_coin:
+    #     eatcoin_sound.play()
+    #     score += 1
+    #     print(score)
 
     camera_offset.x = player.rect.centerx - WIDTH / 2
     camera_offset.y = 0
@@ -496,7 +603,8 @@ while running:
     for sprite in all_sprites:
         screen.blit(sprite.image, sprite.rect.topleft - camera_offset)
 
-    draw_text(screen, 'score is: ' + str(score), 18, WIDTH / 2, 10)
+    draw_text(screen, 'score is: ' + str(player.score), 18, WIDTH / 2, 10)
+    #show_level(current_level)
     pygame.display.update()
 
 pygame.mixer.stop()
