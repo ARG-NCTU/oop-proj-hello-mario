@@ -34,6 +34,7 @@ Left_flying_turtle = pygame.image.load(os.path.join('img', 'Left_flying_turtle.p
 coin_img = pygame.image.load(os.path.join('img', 'coin.png')).convert()
 flag_img = pygame.image.load(os.path.join('img', 'mario_flag.png')).convert()
 gold_brick_img = pygame.image.load(os.path.join('img', 'gold_brick.png')).convert()
+cloud_img = pygame.image.load(os.path.join('img', 'cloud.png')).convert()
 
 # Sounds
 eatcoin_sound = pygame.mixer.Sound(os.path.join('sound', 'eatcoin.wav'))
@@ -149,14 +150,15 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = 90
 
         self.collide_with_bricks()
+        self.collide_with_skystage()
 
     def collide_with_bricks(self):
         collisions = pygame.sprite.spritecollide(self, gold_bricks, False)
         for brick in collisions:
-            if self.vel_y > 0:  # Falling down
-                self.rect.bottom = brick.rect.top
-                self.vel_y = 0
-            elif self.vel_y < 0:  # Jumping up
+            # if self.vel_y > 0:  # Falling down
+            #     self.rect.bottom = brick.rect.top
+            #     self.vel_y = 0
+            if self.vel_y < 0:  # Jumping up
                 self.rect.top = brick.rect.bottom
                 self.vel_y = 0
                 # Generate coin above the brick and play sound
@@ -171,8 +173,15 @@ class Player(pygame.sprite.Sprite):
                         self.rect.right = brick.rect.left
                     if self.rect.left == brick.rect.right:
                         self.rect.left = brick.rect.right
-
-
+    def collide_with_skystage(self):
+        collisions = pygame.sprite.spritecollide(self, skystage, False)
+        for brick in collisions:
+            if self.vel_y > 0:  # Falling down
+                 self.rect.bottom = brick.rect.top
+                 self.vel_y = 0
+            elif self.vel_y < 0:  # Jumping up
+                self.rect.top = brick.rect.bottom
+                self.vel_y = 0
 
 class Enemy1(pygame.sprite.Sprite):
     def __init__(self):
@@ -278,13 +287,28 @@ class FlyingTurtle(pygame.sprite.Sprite):
             self.direction *= -1
 
 class Flag(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,x):
         super().__init__()
         self.image = pygame.transform.scale(flag_img, (131, 300))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        self.rect.y = GROUND_LEVEL - 230
-        self.rect.x = 2900
+        self.rect.y = GROUND_LEVEL - 220
+        self.rect.x = x
+class Cloud(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.transform.scale(cloud_img, (200, 118))
+        self.image.set_colorkey(BLACK)  # Set the colorkey to black
+        self.rect = self.image.get_rect()
+        self.rect.y = random.randint(0, 300)
+        self.rect.x = random.randint(0, 3000)
+        self.vel_x = random.randrange(1, 3)
+
+    def update(self):
+        self.rect.x += self.vel_x
+        if self.rect.x > 3000:
+            self.rect.x = 0
+            self.rect.y = random.randint(0, 300)
 
 
 class Object(pygame.sprite.Sprite):
@@ -345,6 +369,7 @@ all_sprites = pygame.sprite.Group()
 coins = pygame.sprite.Group()
 players = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
+clouds = pygame.sprite.Group()
 
 terrain = pygame.sprite.Group()
 all_sprites.add(floor)
@@ -353,8 +378,16 @@ gold_bricks = pygame.sprite.Group()
 
 
 # Create flag
-flag = Flag()
+flag = Flag(2900)
 all_sprites.add(flag)
+flag = Flag(0)
+all_sprites.add(flag)
+
+# Create clouds
+for i in range(5):
+    cloud = Cloud()
+    all_sprites.add(cloud)
+    clouds.add(cloud)
 
 # Create enemies
 enemy1 = Enemy1()
@@ -405,6 +438,22 @@ for i in range(num_bricks):
     brick = GoldBrick(x, y)
     all_sprites.add(brick)
     gold_bricks.add(brick)
+
+# Create floating blocks in the sky
+skystage = pygame.sprite.Group()
+
+def create_floating_block(x):
+    numbricks = random.randint(0,6)
+    for i in range(numbricks):
+        block = Block(x + i * block_width, GROUND_LEVEL-200, block_width, block_height, scale)
+        all_sprites.add(block)
+        skystage.add(block)
+
+create_floating_block(500)
+create_floating_block(1000)
+create_floating_block(1500)
+create_floating_block(2000)
+create_floating_block(2500)
 
 score = 0
 # Camera offset
