@@ -255,7 +255,7 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
 
         # Check for collision with enemies
-        enemy_hit = pygame.sprite.spritecollideany(self, enemies,False)
+        enemy_hit = pygame.sprite.spritecollideany(self, enemies)
         if enemy_hit:
             enemy_hit.kill()  # Remove the enemy from the sprite group
             self.kill()  # Remove the bullet from the sprite group
@@ -537,9 +537,9 @@ def load_next_level():
     global current_level
     print (current_level)
     current_level += 1
-    if current_level >= len(levels):
+    if current_level >= len(levels+1):
         show_game_over()
-        pygame.quit()
+        #pygame.quit()
     else:
         load_level(current_level,pre_score=player.score)
 
