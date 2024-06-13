@@ -3,7 +3,6 @@ import os
 import random
 from os.path import isfile, join
 
-
 # Constants
 FPS = 60
 WIDTH, HEIGHT = 800, 600  # Screen size
@@ -11,6 +10,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GRAVITY = 0.19
 GROUND_LEVEL = HEIGHT - 150
+MAX_BULLETS = 5  # Maximum number of bullets
 
 # Initialize Pygame
 pygame.init()
@@ -35,11 +35,13 @@ coin_img = pygame.image.load(os.path.join('img', 'coin.png')).convert()
 flag_img = pygame.image.load(os.path.join('img', 'mario_flag.png')).convert()
 gold_brick_img = pygame.image.load(os.path.join('img', 'gold_brick.png')).convert()
 cloud_img = pygame.image.load(os.path.join('img', 'cloud.png')).convert()
-
+bullet_img = pygame.image.load(os.path.join('img', 'bullet.png')).convert()
 # Sounds
 eatcoin_sound = pygame.mixer.Sound(os.path.join('sound', 'eatcoin.wav'))
 gameover_sound = pygame.mixer.Sound(os.path.join('sound', 'gameover.ogg'))
 jump_sound = pygame.mixer.Sound(os.path.join('sound', 'jump.ogg'))
+shoot_sound = pygame.mixer.Sound(os.path.join('sound', 'shoot.ogg'))
+screaming_sound = pygame.mixer.Sound(os.path.join('sound', 'screaming.ogg'))
 pygame.mixer.music.load(os.path.join('sound', 'background.ogg'))
 
 font_name = pygame.font.match_font('arial')
@@ -113,6 +115,7 @@ class Player(pygame.sprite.Sprite):
         self.vel_y = 0
         self.on_ground = True
         self.score = 0
+        self.direction = 1  # 1 for right, -1 for left
 
     def update(self):
         keys = pygame.key.get_pressed()
@@ -124,9 +127,11 @@ class Player(pygame.sprite.Sprite):
                 pygame.quit()
             self.rect.x -= self.speed
             self.image = self.image_left
+            self.direction = -1
         if keys[pygame.K_RIGHT]:
             self.rect.x += self.speed
             self.image = self.image_right
+            self.direction = 1
         if keys[pygame.K_UP] and self.on_ground:
             jump_sound.play()
             if self.image == self.image_right:
@@ -150,11 +155,6 @@ class Player(pygame.sprite.Sprite):
                     self.image = pygame.transform.scale(Left_mario_img, (55, 62))
                 self.image.set_colorkey(BLACK)
 
-        if keys[pygame.K_DOWN]:
-            if self.rect.y > GROUND_LEVEL:
-                self.rect.y = GROUND_LEVEL
-            self.rect.y += self.speed
-
         if self.rect.left > 2900:
             darken_screen()
             self.rect.right = 90
@@ -167,9 +167,6 @@ class Player(pygame.sprite.Sprite):
     def collide_with_bricks(self):
         collisions = pygame.sprite.spritecollide(self, gold_bricks, False)
         for brick in collisions:
-            # if self.vel_y > 0:  # Falling down
-            #     self.rect.bottom = brick.rect.top
-            #     self.vel_y = 0
             if self.vel_y < 0:  # Jumping up
                 self.rect.top = brick.rect.bottom
                 self.vel_y = 0
@@ -185,25 +182,33 @@ class Player(pygame.sprite.Sprite):
                         self.rect.right = brick.rect.left
                     if self.rect.left == brick.rect.right:
                         self.rect.left = brick.rect.right
+
     def collide_with_skystage(self):
         collisions = pygame.sprite.spritecollide(self, skystage, False)
         for brick in collisions:
             if self.vel_y > 0:  # Falling down
-                 self.rect.bottom = brick.rect.top
-                 self.vel_y = 0
+                self.rect.bottom = brick.rect.top
+                self.vel_y = 0
             elif self.vel_y < 0:  # Jumping up
                 self.rect.top = brick.rect.bottom
                 self.vel_y = 0
+
     def eat_coin(self):
         collisions = pygame.sprite.spritecollide(self, coins, True)
         for coin in collisions:
-            #coin.kill()
             eatcoin_sound.play()
             self.score += 1
             pre_score = self.score
             print(self.score)
 
-class Enemy1(pygame.sprite.Sprite):
+    def shoot(self):
+        if MAX_BULLETS >0:  # Check if number of bullets is below the limit
+            bullet = Bullet(self.rect.centerx, self.rect.centery, self.direction)
+            all_sprites.add(bullet)
+            bullets.add(bullet) 
+
+
+class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image_right = pygame.transform.scale(enemy2_img, (40, 40))
@@ -212,13 +217,17 @@ class Enemy1(pygame.sprite.Sprite):
         self.image_left.set_colorkey(BLACK)
         self.image = self.image_right
         self.rect = self.image.get_rect()
-        self.rect.y = GROUND_LEVEL + 35
-        self.rect.x = WIDTH // 2 - self.rect.width // 2
+
+        # Set random initial position
+        self.rect.x = random.randint(50, WIDTH)  # Random X position within screen width
+        self.rect.y = GROUND_LEVEL + 30
+
         self.speed = 2
-        self.direction = -1
+        self.direction = random.choice([-1, 1])  # Random initial direction (-1 for left, 1 for right)
         self.left_bound = self.rect.x - 100
         self.right_bound = self.rect.x + 100
 
+
     def update(self):
         self.rect.x += self.speed * self.direction
         if self.direction == 1:
@@ -226,59 +235,33 @@ class Enemy1(pygame.sprite.Sprite):
         else:
             self.image = self.image_left
 
+        # Check boundaries and change direction if needed
         if self.rect.right >= self.right_bound or self.rect.left <= self.left_bound:
             self.direction *= -1
 
-class Enemy2(pygame.sprite.Sprite):
-    def __init__(self):
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y, direction):
         super().__init__()
-        self.image_right = pygame.transform.scale(enemy2_img, (40, 40))
-        self.image_right.set_colorkey(BLACK)
-        self.image_left = pygame.transform.scale(enemy1_img, (40, 40))
-        self.image_left.set_colorkey(BLACK)
-        self.image = self.image_right
-        self.rect = self.image.get_rect()
-        self.rect.y = GROUND_LEVEL + 35
-        self.rect.x = WIDTH - self.rect.width - 100
-        self.speed = 3
-        self.direction = -1
-        self.left_bound = self.rect.x - 50
-        self.right_bound = self.rect.x + 50
+        self.image = pygame.transform.scale(bullet_img, (10, 10))
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect(center=(x, y))
+        self.speed = 10
+        self.direction = direction
 
     def update(self):
         self.rect.x += self.speed * self.direction
-        if self.direction == 1:
-            self.image = self.image_right
-        else:
-            self.image = self.image_left
+        # Remove the bullet if it goes off-screen
+        if self.rect.x < 0 or self.rect.x > WIDTH:
+            self.kill()
 
-        if self.rect.right >= self.right_bound or self.rect.left <= self.left_bound:
-            self.direction *= -1
-class Enemy3(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image_right = pygame.transform.scale(enemy2_img, (40, 40))
-        self.image_right.set_colorkey(BLACK)
-        self.image_left = pygame.transform.scale(enemy1_img, (40, 40))
-        self.image_left.set_colorkey(BLACK)
-        self.image = self.image_right
-        self.rect = self.image.get_rect()
-        self.rect.y = GROUND_LEVEL + 35
-        self.rect.x = WIDTH//2  #plact it to the middle of background
-        self.speed = 3
-        self.direction = -1
-        self.left_bound = self.rect.x - 200
-        self.right_bound = self.rect.x + 200
+        # Check for collision with enemies
+        enemy_hit = pygame.sprite.spritecollideany(self, enemies,False)
+        if enemy_hit:
+            enemy_hit.kill()  # Remove the enemy from the sprite group
+            self.kill()  # Remove the bullet from the sprite group
+            screaming_sound.play()  # Play sound effect or other actions when enemy is hit
 
-    def update(self):
-        self.rect.x += self.speed * self.direction
-        if self.direction == 1:
-            self.image = self.image_right
-        else:
-            self.image = self.image_left
 
-        if self.rect.right >= self.right_bound or self.rect.left <= self.left_bound:
-            self.direction *= -1
 
 class FlyingTurtle(pygame.sprite.Sprite):
     def __init__(self):
@@ -390,18 +373,20 @@ coins = pygame.sprite.Group()
 players = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 clouds = pygame.sprite.Group()
-
+bullets = pygame.sprite.Group()
+all_sprites.add(bullets)
 terrain = pygame.sprite.Group()
 all_sprites.add(floor)
 
 gold_bricks = pygame.sprite.Group()
-
+all_sprites.add(gold_bricks)
 
 # Create flag
 flag = Flag(2900)
 all_sprites.add(flag)
 flag = Flag(0)
 all_sprites.add(flag)
+
 
 # Create clouds
 for i in range(8):
@@ -410,25 +395,21 @@ for i in range(8):
     clouds.add(cloud)
 
 # Create enemies
-enemy1 = Enemy1()
-enemy2 = Enemy2()
-enemy3 = Enemy3()
+enemy=[]
+for i in range(6):
+    enemy.append(Enemy())
+    all_sprites.add(enemy[i])
+    enemies.add(enemy[i])
+    
 flying_turtle = FlyingTurtle()
-all_sprites.add(enemy1)
-all_sprites.add(enemy2)
-all_sprites.add(enemy3)
 all_sprites.add(flying_turtle)
-all_sprites.add(gold_bricks)
-enemies.add(enemy1)
-enemies.add(enemy2)
-enemies.add(enemy3)
 enemies.add(flying_turtle)
 
 # Create player
 player = Player()
 all_sprites.add(player)
 players.add(player)
-
+#Create bullets
 # Create coins
 def create_coin(existing_end_positions):
     type_num = random.randint(1, 2)
@@ -479,7 +460,7 @@ create_floating_block(2500)
 # Define levels
 levels = [
     {
-        'enemies': [Enemy1()],
+        'enemies': [Enemy()],
         'flying_turtles': [FlyingTurtle()],
         'gold_bricks': [(x, GROUND_LEVEL - 150) for x in range(100, 800, 100)],
         'skystage': [(x, GROUND_LEVEL - 200) for x in range(100, 800, 200)],
@@ -487,14 +468,14 @@ levels = [
     },
     # More levels can be added here
     {
-        'enemies': [Enemy1()],
+        'enemies': [Enemy()],
         'flying_turtles': [FlyingTurtle()],
         'gold_bricks': [(x, GROUND_LEVEL - 50) for x in range(100, 800, 100)],
         'skystage': [(x, GROUND_LEVEL - 200) for x in range(100, 800, 200)],
         'flag': [Flag(0), Flag(2900)],
     },
         {
-        'enemies': [Enemy1()],
+        'enemies': [Enemy()],
         'flying_turtles': [FlyingTurtle()],
         'gold_bricks': [(x, GROUND_LEVEL - 50) for x in range(100, 800, 100)],
         'skystage': [(x, GROUND_LEVEL - 200) for x in range(100, 800, 200)],
@@ -564,6 +545,7 @@ def load_next_level():
 
 
 score = 0
+bullet_num=MAX_BULLETS
 # Camera offset
 camera_offset = pygame.Vector2(0, 0)
 
@@ -572,11 +554,17 @@ running = True
 game_over = False
 pygame.mixer.music.play(-1)
 while running:
+    keys = pygame.key.get_pressed()
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
+        elif keys[pygame.K_DOWN]:
+            player.shoot()
+            MAX_BULLETS-=1
+            if bullet_num>0:
+                shoot_sound.play()
+                bullet_num-=1
     if not game_over:
         all_sprites.update()
 
@@ -584,14 +572,15 @@ while running:
             game_over = True
             show_game_over()
             running = False
-
+        
     #eat_coin = pygame.sprite.groupcollide(players, coins, False, True)
 
     # for eat in eat_coin:
     #     eatcoin_sound.play()
     #     score += 1
     #     print(score)
-
+        for bullet in bullets:
+            bullet.update()
     camera_offset.x = player.rect.centerx - WIDTH / 2
     camera_offset.y = 0
 
@@ -603,9 +592,9 @@ while running:
     for sprite in all_sprites:
         screen.blit(sprite.image, sprite.rect.topleft - camera_offset)
 
-    draw_text(screen, 'score is: ' + str(player.score), 18, WIDTH / 2, 10)
+    draw_text(screen, 'score is: ' + str(player.score), 18, WIDTH // 2, 30)
+    draw_text(screen, 'Bullets: ' + str(bullet_num), 18, 100, 30)
     #show_level(current_level)
     pygame.display.update()
 
 pygame.mixer.stop()
-pygame.quit()
