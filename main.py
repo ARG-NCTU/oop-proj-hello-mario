@@ -479,6 +479,7 @@ levels = [
 
 current_level = -1
 show_level(current_level+1)
+
 def load_level(level_index, pre_score, pre_bullet_num):
     global player, all_sprites, enemies, coins, gold_bricks, skystage, clouds
 
@@ -548,26 +549,22 @@ def load_level(level_index, pre_score, pre_bullet_num):
             print("Not enough coins to exchange!")
             temp = False
 
-    return  current_level,player.score, player.bullet_num
+    return current_level, player.score, player.bullet_num
 
 
-    
 def load_next_level(pre_score, pre_bullet_num):
     global current_level
-    #print(current_level)
     current_level += 1
     if current_level >= len(levels):
         show_game_over()
-        #pygame.quit()
-        return pre_score, pre_bullet_num  # Return current score and bullet_num
+        pygame.mixer.stop()
+        return None, pre_score, pre_bullet_num  # Indicate game over
     else:
-        return load_level(current_level,pre_score,pre_bullet_num)  # Return updated score and bullet_num
-
-
+        return load_level(current_level, pre_score, pre_bullet_num)  # Return updated score and bullet_num
 
 
 score = 0
-bullet_num=5
+bullet_num = 5
 # Camera offset
 camera_offset = pygame.Vector2(0, 0)
 
@@ -575,9 +572,8 @@ camera_offset = pygame.Vector2(0, 0)
 running = True
 game_over = False
 
-
 pygame.mixer.music.play(-1)
-while running :
+while running:
     keys = pygame.key.get_pressed()
     clock.tick(FPS)
     for event in pygame.event.get():
@@ -585,9 +581,10 @@ while running :
             running = False
         elif keys[pygame.K_DOWN]:
             player.shoot()
-            if player.bullet_num>0:
+            if player.bullet_num > 0:
                 shoot_sound.play()
-                player.bullet_num-=1
+                player.bullet_num -= 1
+
     if not game_over:
         all_sprites.update()
 
@@ -596,29 +593,22 @@ while running :
             show_game_over()
             running = False
 
+        if player.rect.right > 3000:  # Check if player reached the end of the level
+            current_level, player.score, player.bullet_num = load_next_level(player.score, player.bullet_num)
+            if current_level is None:  # Game over
+                game_over = True
+                running = False
 
-    #eat_coin = pygame.sprite.groupcollide(players, coins, False, True)
-
-    # for eat in eat_coin:
-    #     eatcoin_sound.play()
-    #     score += 1
-    #     print(score)
-        for bullet in bullets:
-            bullet.update()
     camera_offset.x = player.rect.centerx - WIDTH / 2
     camera_offset.y = 0
 
     screen.fill((93, 147, 253))
-    #draw background with camera offset
-    #screen.blit(background, (-camera_offset.x, -camera_offset.y))
-
-    #draw sprites with camera offset
+    # Draw sprites with camera offset
     for sprite in all_sprites:
         screen.blit(sprite.image, sprite.rect.topleft - camera_offset)
 
-    draw_text(screen, 'score is: ' + str(player.score), 18, WIDTH // 2, 30)
+    draw_text(screen, 'Score: ' + str(player.score), 18, WIDTH // 2, 30)
     draw_text(screen, 'Bullets: ' + str(player.bullet_num), 18, 100, 30)
-    #show_level(current_level)
     pygame.display.update()
 
-pygame.mixer.stop() 
+pygame.mixer.stop()
