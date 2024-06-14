@@ -10,7 +10,6 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GRAVITY = 0.19
 GROUND_LEVEL = HEIGHT - 150
-MAX_BULLETS = 5  # Maximum number of bullets
 
 # Initialize Pygame
 pygame.init()
@@ -115,6 +114,7 @@ class Player(pygame.sprite.Sprite):
         self.vel_y = 0
         self.on_ground = True
         self.score = 0
+        self.bullet_num = 5
         self.direction = 1  # 1 for right, -1 for left
 
     def update(self):
@@ -158,7 +158,7 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left > 2900:
             darken_screen()
             self.rect.right = 90
-            load_next_level()
+            load_next_level(player.score,player.bullet_num )
 
         self.collide_with_bricks()
         self.collide_with_skystage()
@@ -193,16 +193,18 @@ class Player(pygame.sprite.Sprite):
                 self.rect.top = brick.rect.bottom
                 self.vel_y = 0
 
+                    
     def eat_coin(self):
         collisions = pygame.sprite.spritecollide(self, coins, True)
         for coin in collisions:
             eatcoin_sound.play()
             self.score += 1
             pre_score = self.score
+            pre_bullet_num = self.bullet_num
             print(self.score)
 
     def shoot(self):
-        if MAX_BULLETS >0:  # Check if number of bullets is below the limit
+        if player.bullet_num >0:  # Check if number of bullets is below the limit
             bullet = Bullet(self.rect.centerx, self.rect.centery, self.direction)
             all_sprites.add(bullet)
             bullets.add(bullet) 
@@ -219,7 +221,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
         # Set random initial position
-        self.rect.x = random.randint(50, WIDTH)  # Random X position within screen width
+        self.rect.x = random.randint(200, WIDTH+2000)  # Random X position within screen width
         self.rect.y = GROUND_LEVEL + 30
 
         self.speed = 2
@@ -251,8 +253,7 @@ class Bullet(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.speed * self.direction
         # Remove the bullet if it goes off-screen
-        if self.rect.x < 0 or self.rect.x > WIDTH:
-            self.kill()
+
 
         # Check for collision with enemies
         enemy_hit = pygame.sprite.spritecollideany(self, enemies)
@@ -396,7 +397,7 @@ for i in range(8):
 
 # Create enemies
 enemy=[]
-for i in range(6):
+for i in range(7):
     enemy.append(Enemy())
     all_sprites.add(enemy[i])
     enemies.add(enemy[i])
@@ -485,14 +486,15 @@ levels = [
 
 current_level = 0
 show_level(current_level)
-def load_level(level_index,pre_score):
-    global player, all_sprites, enemies, coins, gold_bricks, skystage
+def load_level(level_index, pre_score, pre_bullet_num):
+    global player, all_sprites, enemies, coins, gold_bricks, skystage, clouds
 
     all_sprites.empty()
     enemies.empty()
     coins.empty()
     gold_bricks.empty()
     skystage.empty()
+    clouds.empty()
 
     # Create the floor
     floor = [
@@ -529,23 +531,49 @@ def load_level(level_index,pre_score):
 
     player = Player()
     player.score = pre_score
+    player.bullet_num = pre_bullet_num
     all_sprites.add(player)
     show_level(level_index)
 
+    temp = True
 
-def load_next_level():
+    while temp:
+        print(f"You have {player.score} coins and {player.bullet_num} bullets.")
+        ans = input("Do you want to exchange one bullet with ten coins? (y/n): ")
+        if player.score >=10:
+            if ans == 'y':
+                if player.score >= 10:
+                    player.bullet_num += 1
+                    player.score -= 10
+                    print("Exchanged one bullet for ten coins!")
+                else:
+                    print("Not enough coins to exchange!")
+                    temp = False
+            elif ans == 'n':
+                temp = False
+        else:
+            print("Not enough coins to exchange!")
+            temp = False
+
+    return  current_level,player.score, player.bullet_num
+
+
+    
+def load_next_level(pre_score, pre_bullet_num):
     global current_level
-    print (current_level)
+    print(current_level)
     current_level += 1
-    if current_level >= len(levels+1):
+    if current_level >= len(levels):
         show_game_over()
-        #pygame.quit()
+        return pre_score, pre_bullet_num  # Return current score and bullet_num
     else:
-        load_level(current_level,pre_score=player.score)
+        return load_level(current_level,pre_score,pre_bullet_num)  # Return updated score and bullet_num
+
+
 
 
 score = 0
-bullet_num=MAX_BULLETS
+bullet_num=5
 # Camera offset
 camera_offset = pygame.Vector2(0, 0)
 
@@ -561,10 +589,9 @@ while running:
             running = False
         elif keys[pygame.K_DOWN]:
             player.shoot()
-            MAX_BULLETS-=1
-            if bullet_num>0:
+            if player.bullet_num>0:
                 shoot_sound.play()
-                bullet_num-=1
+                player.bullet_num-=1
     if not game_over:
         all_sprites.update()
 
@@ -572,7 +599,8 @@ while running:
             game_over = True
             show_game_over()
             running = False
-        
+
+
     #eat_coin = pygame.sprite.groupcollide(players, coins, False, True)
 
     # for eat in eat_coin:
@@ -593,8 +621,8 @@ while running:
         screen.blit(sprite.image, sprite.rect.topleft - camera_offset)
 
     draw_text(screen, 'score is: ' + str(player.score), 18, WIDTH // 2, 30)
-    draw_text(screen, 'Bullets: ' + str(bullet_num), 18, 100, 30)
+    draw_text(screen, 'Bullets: ' + str(player.bullet_num), 18, 100, 30)
     #show_level(current_level)
     pygame.display.update()
 
-pygame.mixer.stop()
+pygame.mixer.stop() 
