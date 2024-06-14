@@ -110,7 +110,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = GROUND_LEVEL+5
         self.rect.x = 10
         self.speed = 5
-        self.jump_speed = 10
+        self.jump_speed = 15
         self.vel_y = 0
         self.on_ground = True
         self.score = 0
@@ -132,7 +132,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.x += self.speed
             self.image = self.image_right
             self.direction = 1
-        if keys[pygame.K_UP] and self.on_ground:
+        if keys[pygame.K_UP] and self.on_ground :
             jump_sound.play()
             if self.image == self.image_right:
                 self.image = pygame.transform.scale(Right_mario_jump_img, (55, 62))
@@ -475,17 +475,10 @@ levels = [
         'skystage': [(x, GROUND_LEVEL - 200) for x in range(100, 800, 200)],
         'flag': [Flag(0), Flag(2900)],
     },
-        {
-        'enemies': [Enemy()],
-        'flying_turtles': [FlyingTurtle()],
-        'gold_bricks': [(x, GROUND_LEVEL - 50) for x in range(100, 800, 100)],
-        'skystage': [(x, GROUND_LEVEL - 200) for x in range(100, 800, 200)],
-        'flag': [Flag(0), Flag(2900)],
-    },
 ]
 
-current_level = 0
-show_level(current_level)
+current_level = -1
+show_level(current_level+1)
 def load_level(level_index, pre_score, pre_bullet_num):
     global player, all_sprites, enemies, coins, gold_bricks, skystage, clouds
 
@@ -533,7 +526,7 @@ def load_level(level_index, pre_score, pre_bullet_num):
     player.score = pre_score
     player.bullet_num = pre_bullet_num
     all_sprites.add(player)
-    show_level(level_index)
+    show_level(level_index+1)
 
     temp = True
 
@@ -561,10 +554,11 @@ def load_level(level_index, pre_score, pre_bullet_num):
     
 def load_next_level(pre_score, pre_bullet_num):
     global current_level
-    print(current_level)
+    #print(current_level)
     current_level += 1
     if current_level >= len(levels):
         show_game_over()
+        #pygame.quit()
         return pre_score, pre_bullet_num  # Return current score and bullet_num
     else:
         return load_level(current_level,pre_score,pre_bullet_num)  # Return updated score and bullet_num
@@ -580,8 +574,10 @@ camera_offset = pygame.Vector2(0, 0)
 # Main game loop
 running = True
 game_over = False
+
+
 pygame.mixer.music.play(-1)
-while running:
+while running :
     keys = pygame.key.get_pressed()
     clock.tick(FPS)
     for event in pygame.event.get():
