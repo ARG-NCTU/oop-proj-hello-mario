@@ -74,7 +74,7 @@ def show_game_over():
 def show_level(level_index):
     #pygame.time.delay(500)
     font = pygame.font.SysFont(None, 74)
-    text = font.render('Level '+ str(level_index+1), True, WHITE)
+    text = font.render('Level '+ str(level_index), True, WHITE)
     text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
     screen.blit(text, text_rect)
     pygame.display.update()
@@ -110,9 +110,10 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = GROUND_LEVEL+5
         self.rect.x = 10
         self.speed = 5
-        self.jump_speed = 15
+        self.jump_speed = 10
         self.vel_y = 0
         self.on_ground = True
+        self.on_skystage = False
         self.score = 0
         self.bullet_num = 5
         self.direction = 1  # 1 for right, -1 for left
@@ -141,6 +142,7 @@ class Player(pygame.sprite.Sprite):
             self.image.set_colorkey(WHITE)
             self.vel_y = -self.jump_speed
             self.on_ground = False
+            
 
         if not self.on_ground:
             self.vel_y += GRAVITY
@@ -155,17 +157,19 @@ class Player(pygame.sprite.Sprite):
                     self.image = pygame.transform.scale(Left_mario_img, (55, 62))
                 self.image.set_colorkey(BLACK)
 
-        if self.rect.left > 2900:
-            darken_screen()
-            self.rect.right = 90
-            load_next_level(player.score,player.bullet_num )
+        # if self.rect.left > 2900:
+        #     darken_screen()
+        #     self.rect.right = 90
+            #load_next_level(player.score,player.bullet_num )
 
         self.collide_with_bricks()
         self.collide_with_skystage()
         self.eat_coin()
+        if self.rect.top <=0: # Limit player movement within the screen
+            self.rect.top = 0
 
     def collide_with_bricks(self):
-        collisions = pygame.sprite.spritecollide(self, gold_bricks, False)
+        collisions = pygame.sprite.spritecollide(self, gold_bricks, True)
         for brick in collisions:
             if self.vel_y < 0:  # Jumping up
                 self.rect.top = brick.rect.bottom
@@ -189,9 +193,11 @@ class Player(pygame.sprite.Sprite):
             if self.vel_y > 0:  # Falling down
                 self.rect.bottom = brick.rect.top
                 self.vel_y = 0
+
             elif self.vel_y < 0:  # Jumping up
                 self.rect.top = brick.rect.bottom
                 self.vel_y = 0
+
 
                     
     def eat_coin(self):
@@ -208,6 +214,7 @@ class Player(pygame.sprite.Sprite):
             bullet = Bullet(self.rect.centerx, self.rect.centery, self.direction)
             all_sprites.add(bullet)
             bullets.add(bullet) 
+
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -265,7 +272,7 @@ class Bullet(pygame.sprite.Sprite):
 
 
 class FlyingTurtle(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,x):
         super().__init__()
         self.image_right = pygame.transform.scale(Right_flying_turtle, (55, 62))
         self.image_right.set_colorkey(BLACK)
@@ -273,8 +280,8 @@ class FlyingTurtle(pygame.sprite.Sprite):
         self.image_left.set_colorkey(BLACK)
         self.image = self.image_right
         self.rect = self.image.get_rect()
-        self.rect.y = GROUND_LEVEL - 90
-        self.rect.x = WIDTH // 2 - self.rect.width // 2
+        self.rect.y = GROUND_LEVEL - 250
+        self.rect.x = x
         self.speed = 2
         self.direction = -1
         self.left_bound = self.rect.x - 400
@@ -401,10 +408,11 @@ for i in range(7):
     enemy.append(Enemy())
     all_sprites.add(enemy[i])
     enemies.add(enemy[i])
-    
-flying_turtle = FlyingTurtle()
-all_sprites.add(flying_turtle)
-enemies.add(flying_turtle)
+
+for i in range(1000,3000,3000):
+    flying_turtle = FlyingTurtle(i)
+    all_sprites.add(flying_turtle)
+    enemies.add(flying_turtle)
 
 # Create player
 player = Player()
@@ -451,34 +459,29 @@ def create_floating_block(x):
         all_sprites.add(block)
         skystage.add(block)
 
-create_floating_block(500)
-create_floating_block(1000)
-create_floating_block(1500)
-create_floating_block(2000)
-create_floating_block(2500)
+for x in range (500,3000,500):
+    create_floating_block(x)
 
 
 # Define levels
 levels = [
     {
         'enemies': [Enemy()],
-        'flying_turtles': [FlyingTurtle()],
-        'gold_bricks': [(x, GROUND_LEVEL - 150) for x in range(100, 800, 100)],
-        'skystage': [(x, GROUND_LEVEL - 200) for x in range(100, 800, 200)],
+        'flying_turtles': [FlyingTurtle(500), FlyingTurtle(1000), FlyingTurtle(1500), FlyingTurtle(2000), FlyingTurtle(2500), FlyingTurtle(3000)],
+        'gold_bricks': [(x, GROUND_LEVEL - 100) for x in range(200, 2900, 100)],
         'flag': [Flag(0), Flag(2900)],
     },
     # More levels can be added here
     {
         'enemies': [Enemy()],
-        'flying_turtles': [FlyingTurtle()],
-        'gold_bricks': [(x, GROUND_LEVEL - 50) for x in range(100, 800, 100)],
-        'skystage': [(x, GROUND_LEVEL - 200) for x in range(100, 800, 200)],
+        'flying_turtles': [FlyingTurtle(750), FlyingTurtle(1500), FlyingTurtle(2250), FlyingTurtle(3000)],
+        'gold_bricks': [(x, GROUND_LEVEL - 100) for x in range(100, 25000, 200)],
         'flag': [Flag(0), Flag(2900)],
     },
 ]
 
 current_level = -1
-show_level(current_level+1)
+show_level(current_level+2)
 
 def load_level(level_index, pre_score, pre_bullet_num):
     global player, all_sprites, enemies, coins, gold_bricks, skystage, clouds
@@ -498,23 +501,25 @@ def load_level(level_index, pre_score, pre_bullet_num):
     all_sprites.add(floor)
     level_data = levels[level_index]
     coin_end_positions = []
-    for i in range(5):
+    for i in range(10):
         coin_end_positions.append(create_coin(coin_end_positions))
 
     for enemy in level_data['enemies']:
         all_sprites.add(enemy)
         enemies.add(enemy)
+
     for flying_turtle in level_data['flying_turtles']:
         all_sprites.add(flying_turtle)
         enemies.add(flying_turtle)
+
     for x, y in level_data['gold_bricks']:
         brick = GoldBrick(x, y)
         all_sprites.add(brick)
         gold_bricks.add(brick)
-    for x, y in level_data['skystage']:
-        sky = Block(x, y, block_width, block_height, scale)
-        all_sprites.add(sky)
-        skystage.add(sky)
+
+    for x in range (500,3000,500):
+        create_floating_block(x)
+
     all_sprites.add(level_data['flag'])
 
     # Create clouds
@@ -527,7 +532,8 @@ def load_level(level_index, pre_score, pre_bullet_num):
     player.score = pre_score
     player.bullet_num = pre_bullet_num
     all_sprites.add(player)
-    show_level(level_index+1)
+    darken_screen()
+    show_level(level_index+2)
 
     temp = True
 
@@ -593,8 +599,9 @@ while running:
             show_game_over()
             running = False
 
-        if player.rect.right > 3000:  # Check if player reached the end of the level
+        if player.rect.left > 3000:  # Check if player reached the end of the level
             current_level, player.score, player.bullet_num = load_next_level(player.score, player.bullet_num)
+            #print('the next level '+str(current_level))
             if current_level is None:  # Game over
                 game_over = True
                 running = False
