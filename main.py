@@ -44,6 +44,8 @@ screaming_sound = pygame.mixer.Sound(os.path.join('sound', 'screaming.ogg'))
 pygame.mixer.music.load(os.path.join('sound', 'background.ogg'))
 
 font_name = pygame.font.match_font('arial')
+
+
 def draw_text(surf, text, size, x, y):
     font = pygame.font.Font(font_name, size)
     text_surface = font.render(text, True, WHITE)
@@ -52,6 +54,19 @@ def draw_text(surf, text, size, x, y):
     text_rect.top = y
     surf.blit(text_surface, text_rect)
 
+def draw_init():
+    draw_text(screen, 'HELLO MARIO', 64, WIDTH / 2, HEIGHT / 4)
+    draw_text(screen, 'UP: JUMP, LEFT & RIGHT MOVE, DOWN: BULLET', 22, WIDTH / 2, HEIGHT / 2)
+    draw_text(screen, 'PRESS ANY KEY TO START', 18, WIDTH / 2, HEIGHT * 3 / 4)
+    pygame.display.update() 
+    waiting = True
+    while waiting:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.KEYUP: #press and up start the game
+                waiting = False
 def darken_screen():
     dark_img = screen.convert_alpha()
     for opacity in range(0, 255, 15):
@@ -115,7 +130,7 @@ class Player(pygame.sprite.Sprite):
         self.on_ground = True
         self.on_skystage = False
         self.score = 0
-        self.bullet_num = 5
+        self.bullet_num = 10
         self.direction = 1  # 1 for right, -1 for left
 
     def update(self):
@@ -404,7 +419,7 @@ for i in range(8):
 
 # Create enemies
 enemy=[]
-for i in range(7):
+for i in range(5):
     enemy.append(Enemy())
     all_sprites.add(enemy[i])
     enemies.add(enemy[i])
@@ -466,22 +481,20 @@ for x in range (500,3000,500):
 # Define levels
 levels = [
     {
-        'enemies': [Enemy()],
-        'flying_turtles': [FlyingTurtle(500), FlyingTurtle(1000), FlyingTurtle(1500), FlyingTurtle(2000), FlyingTurtle(2500), FlyingTurtle(3000)],
+        'flying_turtles': [ FlyingTurtle(1500), FlyingTurtle(2000), FlyingTurtle(3000)],
         'gold_bricks': [(x, GROUND_LEVEL - 100) for x in range(200, 2900, 100)],
         'flag': [Flag(0), Flag(2900)],
     },
     # More levels can be added here
     {
-        'enemies': [Enemy()],
         'flying_turtles': [FlyingTurtle(750), FlyingTurtle(1500), FlyingTurtle(2250), FlyingTurtle(3000)],
         'gold_bricks': [(x, GROUND_LEVEL - 100) for x in range(100, 25000, 200)],
         'flag': [Flag(0), Flag(2900)],
     },
 ]
 
-current_level = -1
-show_level(current_level+2)
+# current_level = -1
+# show_level(current_level+2)
 
 def load_level(level_index, pre_score, pre_bullet_num):
     global player, all_sprites, enemies, coins, gold_bricks, skystage, clouds
@@ -504,9 +517,12 @@ def load_level(level_index, pre_score, pre_bullet_num):
     for i in range(10):
         coin_end_positions.append(create_coin(coin_end_positions))
 
-    for enemy in level_data['enemies']:
-        all_sprites.add(enemy)
-        enemies.add(enemy)
+    # Create enemies
+    enemy=[]
+    for i in range(3):
+        enemy.append(Enemy())
+        all_sprites.add(enemy[i])
+        enemies.add(enemy[i])
 
     for flying_turtle in level_data['flying_turtles']:
         all_sprites.add(flying_turtle)
@@ -577,11 +593,20 @@ camera_offset = pygame.Vector2(0, 0)
 # Main game loop
 running = True
 game_over = False
+show_init = True
+
 
 pygame.mixer.music.play(-1)
 while running:
+    if show_init:
+        draw_init()
+        show_init = False
+        darken_screen()
+        current_level = -1
+        show_level(current_level+2)
     keys = pygame.key.get_pressed()
     clock.tick(FPS)
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -599,7 +624,7 @@ while running:
             show_game_over()
             running = False
 
-        if player.rect.left > 3000:  # Check if player reached the end of the level
+        if player.rect.right > 3000:  # Check if player reached the end of the level
             current_level, player.score, player.bullet_num = load_next_level(player.score, player.bullet_num)
             #print('the next level '+str(current_level))
             if current_level is None:  # Game over
