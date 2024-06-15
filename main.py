@@ -42,6 +42,8 @@ jump_sound = pygame.mixer.Sound(os.path.join('sound', 'jump.ogg'))
 shoot_sound = pygame.mixer.Sound(os.path.join('sound', 'shoot.ogg'))
 screaming_sound = pygame.mixer.Sound(os.path.join('sound', 'screaming.ogg'))
 pygame.mixer.music.load(os.path.join('sound', 'background.ogg'))
+upgrade_sound = pygame.mixer.Sound(os.path.join('sound', 'upgrade.ogg'))
+win_sound = pygame.mixer.Sound(os.path.join('sound', 'win.ogg'))
 
 font_name = pygame.font.match_font('arial')
 
@@ -554,6 +556,7 @@ def load_level(level_index, pre_score, pre_bullet_num):
     temp = True
 
     while temp:
+        pygame.mixer.music.stop()
         print(f"You have {player.score} coins and {player.bullet_num} bullets.")
         ans = input("Do you want to exchange one bullet with ten coins? (y/n): ")
         if player.score >=10:
@@ -578,8 +581,8 @@ def load_next_level(pre_score, pre_bullet_num):
     global current_level
     current_level += 1
     if current_level >= len(levels):
-        show_game_over()
-        pygame.mixer.stop()
+        #show_game_over()
+        #pygame.mixer.stop()
         return None, pre_score, pre_bullet_num  # Indicate game over
     else:
         return load_level(current_level, pre_score, pre_bullet_num)  # Return updated score and bullet_num
@@ -625,11 +628,20 @@ while running:
             running = False
 
         if player.rect.right > 3000:  # Check if player reached the end of the level
+            
             current_level, player.score, player.bullet_num = load_next_level(player.score, player.bullet_num)
             #print('the next level '+str(current_level))
             if current_level is None:  # Game over
-                game_over = True
+                pygame.mixer.stop()
+                win_sound.play()
+                pygame.time.delay(9000)
                 running = False
+            else:
+                #pygame.mixer.stop()
+                upgrade_sound.play()
+                pygame.time.delay(5000)
+                pygame.mixer.music.play(-1)
+                
 
     camera_offset.x = player.rect.centerx - WIDTH / 2
     camera_offset.y = 0
