@@ -58,8 +58,8 @@ def draw_text(surf, text, size, x, y):
 
 def draw_init():
     draw_text(screen, 'HELLO MARIO', 64, WIDTH / 2, HEIGHT / 4)
-    draw_text(screen, 'UP: JUMP, LEFT & RIGHT MOVE, DOWN: BULLET', 22, WIDTH / 2, HEIGHT / 2)
-    draw_text(screen, 'PRESS ANY KEY TO START', 18, WIDTH / 2, HEIGHT * 3 / 4)
+    draw_text(screen, 'Up: jump, left & right move, Down: bullet', 22, WIDTH / 2, HEIGHT / 2)
+    draw_text(screen, 'Press any key to start', 18, WIDTH / 2, HEIGHT * 3 / 4)
     pygame.display.update() 
     waiting = True
     while waiting:
@@ -273,6 +273,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 10
         self.direction = direction
+        self.killenemy = 0
 
     def update(self):
         self.rect.x += self.speed * self.direction
@@ -282,6 +283,7 @@ class Bullet(pygame.sprite.Sprite):
         # Check for collision with enemies
         enemy_hit = pygame.sprite.spritecollideany(self, enemies)
         if enemy_hit:
+            self.killenemy =self.killenemy+1
             enemy_hit.kill()  # Remove the enemy from the sprite group
             self.kill()  # Remove the bullet from the sprite group
             screaming_sound.play()  # Play sound effect or other actions when enemy is hit
@@ -500,7 +502,7 @@ levels = [
 
 def load_level(level_index, pre_score, pre_bullet_num):
     global player, all_sprites, enemies, coins, gold_bricks, skystage, clouds
-
+    Bullet.killenemy = 0
     all_sprites.empty()
     enemies.empty()
     coins.empty()
@@ -587,6 +589,7 @@ def load_next_level(pre_score, pre_bullet_num):
     else:
         return load_level(current_level, pre_score, pre_bullet_num)  # Return updated score and bullet_num
 
+record = []
 
 score = 0
 bullet_num = 5
@@ -632,11 +635,19 @@ while running:
             current_level, player.score, player.bullet_num = load_next_level(player.score, player.bullet_num)
             #print('the next level '+str(current_level))
             if current_level is None:  # Game over
-                pygame.mixer.stop()
+                record.append(player.score)
+                pygame.mixer.music.stop()
+                darken_screen()
+                draw_text(screen, 'YOU WIN', 64, WIDTH / 2, HEIGHT / 4)
+                draw_text(screen, 'Your average score: ' + str(sum(record)/3), 32, WIDTH / 2, HEIGHT * 3 / 4)
+                pygame.display.update()
+                #draw_text(screen, 'Your kill % : '+str(), 18, WIDTH / 2, HEIGHT * 3 / 4 + 50)
                 win_sound.play()
                 pygame.time.delay(9000)
                 running = False
+                
             else:
+                record.append(player.score)
                 #pygame.mixer.stop()
                 upgrade_sound.play()
                 pygame.time.delay(5000)
