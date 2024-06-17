@@ -126,10 +126,11 @@ def show_game_over():
     text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
     screen.blit(text, text_rect)
     pygame.display.update()
+    pygame.time.delay(2000)
     darken_screen()
     leaderboard = update_leaderboard(player.score)
     show_leaderboard(leaderboard)
-    pygame.time.delay(2000)
+    pygame.time.delay(1000)
 
 def show_level(level_index):
     #pygame.time.delay(500)
@@ -154,18 +155,32 @@ def create_dataframe(scores):
     return df
 
 # 主函數，用於讀取數據和繪製圖形
+
+import numpy as np
+
 def picture():
-    scores = read_leaderboard()
-    df = create_dataframe(scores)
+    scores = read_leaderboard()  # 假設這個函數讀取並返回分數數據
+    df = create_dataframe(scores)  # 假設這個函數將分數轉換為數據框
     df = df.sort_values(by='score', ascending=False)
-    # 繪製
+    
+    # 計算平均值和標準差
+    mean_score = df['score'].mean()
+    std_score = df['score'].std()
+    
+    # 繪製圖表
     plt.figure(figsize=(10, 6))
     sns.barplot(x='score', y='name', data=df, palette='viridis')
+    
+    # 添加平均值和標準差到圖表上方
+    plt.text(x=mean_score, y=-1, s=f'Mean: {mean_score:.2f}', ha='center', va='center')
+    plt.text(x=mean_score, y=-0.8, s=f'Standard Deviation: {std_score:.2f}', ha='center', va='center')
+    
     # 加標題和標籤
     plt.title('Leaderboard Rankings')
     plt.xlabel('Score')
     plt.ylabel('Player')
-    # 顯示
+    
+    # 顯示圖表
     plt.show()
 
 class Coin(pygame.sprite.Sprite):
