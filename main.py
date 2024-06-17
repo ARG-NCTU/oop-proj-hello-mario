@@ -2,6 +2,9 @@ import pygame
 import os
 import random
 from os.path import isfile, join
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # Constants
 FPS = 60
@@ -136,6 +139,34 @@ def show_level(level_index):
     screen.blit(text, text_rect)
     pygame.display.update()
     pygame.time.delay(2000)
+
+def read_leaderboard():
+    if os.path.isfile('leaderboard.json'):
+        with open('leaderboard.json', 'r') as file:
+            return json.load(file)
+    else:
+        return []
+
+# 將數據轉換為DataFrame並生成玩家名稱
+def create_dataframe(scores):
+    data = {'name': [f'Player {i+1}' for i in range(len(scores))], 'score': scores}
+    df = pd.DataFrame(data)
+    return df
+
+# 主函數，用於讀取數據和繪製圖形
+def picture():
+    scores = read_leaderboard()
+    df = create_dataframe(scores)
+    df = df.sort_values(by='score', ascending=False)
+    # 繪製
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x='score', y='name', data=df, palette='viridis')
+    # 加標題和標籤
+    plt.title('Leaderboard Rankings')
+    plt.xlabel('Score')
+    plt.ylabel('Player')
+    # 顯示
+    plt.show()
 
 class Coin(pygame.sprite.Sprite):
     def __init__(self, type, coin_num, coin_start):
@@ -667,7 +698,9 @@ while running:
         if pygame.sprite.spritecollideany(player, enemies):
             game_over = True
             show_game_over()
+            picture()
             running = False
+            
 
         if player.rect.right > 3000:  # Check if player reached the end of the level
             
@@ -683,7 +716,8 @@ while running:
                 show_leaderboard(leaderboard)
                 pygame.display.update()
                 win_sound.play()
-                pygame.time.delay(9000)
+                pygame.time.delay(2000)
+                picture()
                 running = False
                 
             else:
