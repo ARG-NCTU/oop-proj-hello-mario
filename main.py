@@ -45,6 +45,34 @@ pygame.mixer.music.load(os.path.join('sound', 'background.ogg'))
 upgrade_sound = pygame.mixer.Sound(os.path.join('sound', 'upgrade.ogg'))
 win_sound = pygame.mixer.Sound(os.path.join('sound', 'win.ogg'))
 
+
+import json
+
+# 檔案名稱
+LEADERBOARD_FILE = 'leaderboard.json'
+
+# 讀取排行榜數據
+def read_leaderboard():
+    if isfile(LEADERBOARD_FILE):
+        with open(LEADERBOARD_FILE, 'r') as file:
+            return json.load(file)
+    else:
+        return []
+
+# 寫入排行榜數據
+def write_leaderboard(leaderboard):
+    with open(LEADERBOARD_FILE, 'w') as file:
+        json.dump(leaderboard, file)
+
+# 更新排行榜數據
+def update_leaderboard(new_score):
+    leaderboard = read_leaderboard()
+    leaderboard.append(new_score)
+    leaderboard = sorted(leaderboard, reverse=True)[:5]  # 保留前五名
+    write_leaderboard(leaderboard)
+    return leaderboard
+
+
 font_name = pygame.font.match_font('arial')
 
 
@@ -78,7 +106,16 @@ def darken_screen():
         pygame.display.update()
         pygame.time.delay(100)
 
+
+def show_leaderboard(leaderboard):
+    draw_text(screen, 'Leaderboard', 32, WIDTH / 2, HEIGHT / 2 -200)
+    for i, score in enumerate(leaderboard):
+        draw_text(screen, f'{i + 1}. {score}', 24, WIDTH / 2, HEIGHT / 2  + i * 30)
+    pygame.display.update()
+    pygame.time.delay(5000)
+
 def show_game_over():
+    global player
     gameover_sound.play()
     pygame.time.delay(500)
     font = pygame.font.SysFont(None, 74)
@@ -86,6 +123,9 @@ def show_game_over():
     text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
     screen.blit(text, text_rect)
     pygame.display.update()
+    darken_screen()
+    leaderboard = update_leaderboard(player.score)
+    show_leaderboard(leaderboard)
     pygame.time.delay(2000)
 
 def show_level(level_index):
@@ -635,18 +675,20 @@ while running:
             #print('the next level '+str(current_level))
             if current_level is None:  # Game over
                 record.append(player.score)
+                leaderboard = update_leaderboard(player.score)
                 pygame.mixer.music.stop()
                 darken_screen()
                 draw_text(screen, 'YOU WIN', 64, WIDTH / 2, HEIGHT / 4)
                 draw_text(screen, 'Your average score: ' + str(sum(record)/3), 32, WIDTH / 2, HEIGHT * 3 / 4)
+                show_leaderboard(leaderboard)
                 pygame.display.update()
-                #draw_text(screen, 'Your kill % : '+str(), 18, WIDTH / 2, HEIGHT * 3 / 4 + 50)
                 win_sound.play()
                 pygame.time.delay(9000)
                 running = False
                 
             else:
                 record.append(player.score)
+                player.score +=10
                 #pygame.mixer.stop()
                 upgrade_sound.play()
                 pygame.time.delay(5000)
