@@ -592,7 +592,6 @@ def load_next_level(pre_score, pre_bullet_num):
 record = []
 
 score = 0
-bullet_num = 5
 # Camera offset
 camera_offset = pygame.Vector2(0, 0)
 
