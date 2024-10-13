@@ -42,12 +42,24 @@ $ source Docker/docker_run.sh
 
 若音訊設備已正確安裝並被偵測到，輸入
 ```
-# export AUDIODEV=hw:2,0
+# export AUDIODEV=hw:(#card_number),(#device_number)
 ```
+其中hw:後面的數字代表使用第(#card_number)張卡的第(#device_number)個設備
+
+需要依據前面`aplay -l`列出的結果來選擇
+
+例如以下：
+![aplay example image](aplay_example.png)
+圖中HDA Analog為筆電喇叭，則指令須輸入
 ```
-# speaker-test -D hw:2,0 -t wav -c 2
+# export AUDIODEV=hw:0,0
 ```
-測試聲音，有聲音的話就可以ctrl-c結束並執行遊戲
+
+輸入完成後，可以輸入以下指令來測試是否設定成功
+```
+# speaker-test -D hw:(#card_number),(#device_number) -t wav -c 2
+```
+有聲音的話表示音訊設備設定成功，就可以ctrl-c結束並執行遊戲
 ```
 # python3 main.py
 ```
