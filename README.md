@@ -1,8 +1,8 @@
 # Game Demo
-![这是一个示例 GIF](mario.gif)
+![这是一个示例 GIF](docs/mario.gif)
 
 # Class Diagram of main program
-![Class Diagram](classes.png)
+![Class Diagram](docs/classes.png)
 
 # If you're first time using docker 
 First open the terminal and type
@@ -49,7 +49,7 @@ $ source Docker/docker_run.sh
 需要依據前面`aplay -l`列出的結果來選擇
 
 例如以下：
-![aplay example image](aplay_example.png)
+![aplay example image](docs/aplay_example.png)
 圖中HDA Analog為筆電喇叭，則指令須輸入
 ```
 # export AUDIODEV=hw:0,0
