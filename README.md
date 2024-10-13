@@ -49,7 +49,9 @@ $ source Docker/docker_run.sh
 需要依據前面`aplay -l`列出的結果來選擇
 
 例如以下：
+
 ![aplay example image](docs/aplay_example.png)
+
 圖中HDA Analog為筆電喇叭，則指令須輸入
 ```
 # export AUDIODEV=hw:0,0
