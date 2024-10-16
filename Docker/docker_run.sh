@@ -2,7 +2,7 @@
 
 ARGS=("$@")
 USER_NAME="arg"
-PROJ_NAME="oop_proj_project5"
+PROJ_NAME=${PWD##*/}
 
 # Make sure processes in the container can connect to the x server
 # Necessary so gazebo can create a context for OpenGL rendering (even headless)
