@@ -25,7 +25,7 @@ $ groups
 # How to run the game
 首先進入docker
 ```
-$ source docker/build.sh
+$ source Docker/build.sh
 ```
 進入docker後輸入下列指令即可進入遊戲:
 ```
