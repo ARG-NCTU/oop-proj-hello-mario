@@ -4,7 +4,7 @@
 # Class Diagram of main program
 ![Class Diagram](docs/classes.png)
 
-# If you're first time using docker 
+# Use Docker As Root
 First open the terminal and type
 ```
 $ sudo groupadd -f docker
