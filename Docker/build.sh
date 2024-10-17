@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-PARENT_DIR=${PWD%/*}
-IMAGE_NAME=${PARENT_DIR##*/}
+IMAGE_NAME=${PWD##*/}
 CONTAINER_NAME="${IMAGE_NAME}_container"
 XAUTH=/tmp/.docker.xauth
 
@@ -21,12 +20,12 @@ fi
 
 if [ ! -f $XAUTH ]; then
     echo "[$XAUTH] was not properly created. Exiting..."
-    exit 1
+    return 1
 fi
 
 if [ $? -ne 0 ]; then
     echo "Docker image built failed"
-    exit 1
+    return 1
 fi
 
 xhost +
@@ -37,6 +36,8 @@ docker run \
     -e DISPLAY=$DISPLAY \
     -v "/tmp/.X11-unix:/tmp/.X11-unix" \
     -v "/home/$USER/$IMAGE_NAME:/home/arg/$IMAGE_NAME" \
+    -v $XAUTH:$XAUTH \
+    -w /home/arg/$IMAGE_NAME \
     --device /dev/snd:/dev/snd \
     --privileged \
     --net=host \
