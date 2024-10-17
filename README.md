@@ -25,12 +25,9 @@ $ groups
 # How to run the game
 首先進入docker
 ```
-$ source Docker/docker_run.sh
+$ source docker/build.sh
 ```
 進入docker後輸入下列指令即可進入遊戲:
-```
-# source require.sh
-```
 ```
 # python3 main.py
 ```
