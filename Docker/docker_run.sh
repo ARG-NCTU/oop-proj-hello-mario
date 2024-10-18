@@ -34,7 +34,7 @@ docker run \
     -e XAUTHORITY=$XAUTH \
     -v "$XAUTH:$XAUTH" \
     -v "/home/$USER/$PROJ_NAME:/home/arg/$PROJ_NAME" \
-    -v "/tmp/.X11-unix:/tmp/.X11-unix" \
+    -v "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
     -v "/etc/localtime:/etc/localtime:ro" \
     -v "/dev:/dev" \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
