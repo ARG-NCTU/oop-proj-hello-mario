@@ -23,9 +23,14 @@ $ groups
 ```
 
 # How to run the game
-首先進入docker
+首先進入repo
+```
+$ cd oop-proj-hello-mario
+```
+然後把docker build起來並進入docker
 ```
 $ source Docker/build.sh
+$ source Docker/docker_run.sh
 ```
 進入docker後輸入下列指令即可進入遊戲:
 ```
