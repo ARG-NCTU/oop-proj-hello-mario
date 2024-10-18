@@ -12,5 +12,5 @@ COPY . .
 USER root
 
 RUN chmod +x require.sh && ./require.sh
-RUN chmod 777 /tmp/.X11-unix
+# RUN chmod 777 /tmp/.X11-unix
 CMD ["bash"]
