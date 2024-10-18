@@ -5,7 +5,7 @@ CONTAINER_NAME="${IMAGE_NAME}_container"
 XAUTH=/tmp/.docker.xauth
 
 echo "Building docker image: ${IMAGE_NAME}"
-docker build -t ${IMAGE_NAME} . > /dev/null 2>&1
+docker buildx build -t ${IMAGE_NAME} . > /dev/null 2>&1
 
 if [ ! -f $XAUTH ]; then
     xauth_list=$(xauth nlist $DISPLAY)
