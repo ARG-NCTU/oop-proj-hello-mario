@@ -2,7 +2,7 @@
 
 ARGS=("$@")
 USER_NAME="arg"
-PROJ_NAME=${PWD##*/}
+PROJ_NAME="oop-proj-hello-mario"
 
 # Make sure processes in the container can connect to the x server
 # Necessary so gazebo can create a context for OpenGL rendering (even headless)
@@ -43,6 +43,6 @@ docker run \
     --network host \
     --privileged \
     --security-opt seccomp=unconfined \
-    argnctu/oop:latest \
+    argnctu/oop:hello-mario \
     $BASH_OPTION
 xhost -
