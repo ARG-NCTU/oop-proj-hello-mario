@@ -1,6 +1,7 @@
 FROM argnctu/oop:latest
 
-ENV DISPLAY=:0
+ARG DISPLAY
+ENV DISPLAY=${DISPLAY}
 ENV QT_X11_NO_MITSHM=1
 ENV XAUTHORITY=/tmp/.docker.xauth
 
