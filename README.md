@@ -30,13 +30,17 @@ $ cd oop-proj-hello-mario
 然後把docker build起來並進入docker
 ```
 $ source Docker/build.sh
-$ source Docker/docker_run.sh
+$ source Docker/docker_run.sh 或 $ ./docker_run
+```
+若docker已在執行中請使用
+```
+$ source Docker/docker_join.sh 或 $ ./docker_join
 ```
 進入docker後輸入下列指令即可進入遊戲:
 ```
 # python3 main.py
 ```
-若出現ALSA相關問題可嘗試輸入
+若出現ALSA相關問題表示音訊設定錯誤，可嘗試輸入
 ```
 # aplay -l
 ```
