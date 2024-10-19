@@ -4,6 +4,18 @@ REPOSITORY="argnctu/oop"
 TAG="hello-mario"
 IMG="${REPOSITORY}:${TAG}"
 
+# Docker login
+if ! docker info | grep -q "Username"; then
+  echo "Docker not logged in. Attempting to login..."
+  docker login
+  if [ $? -ne 0 ]; then
+    echo "Docker login failed. Exiting..."
+    return 1
+  fi
+else
+  echo "Already logged in to Docker Hub"
+fi
+
 # Get the full path and name of the script
 # See https://bit.ly/3zHMisF
 SCRIPT_NAME=$(basename $BASH_SOURCE)
