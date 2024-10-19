@@ -1,8 +1,11 @@
 # Game Demo
-![这是一个示例 GIF](docs/mario.gif)
+![Game Demo GIF](docs/mario.gif)
 
 # Class Diagram of main program
 ![Class Diagram](docs/classes.png)
+
+# Requirements
+You must have a **Docker Hub account** to build docker image and run the game.
 
 # Use Docker As Root
 First open the terminal and type
@@ -30,6 +33,11 @@ $ cd oop-proj-hello-mario
 然後把docker build起來並進入docker
 ```
 $ source Docker/build.sh
+```
+過程中若出現需要docker login，請使用自己的Docker Hub account登入
+
+完成後再執行
+```
 $ source Docker/docker_run.sh 或 $ ./docker_run
 ```
 若docker已在執行中請使用
