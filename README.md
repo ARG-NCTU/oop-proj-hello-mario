@@ -4,8 +4,11 @@
 # Class Diagram of main program
 ![Class Diagram](docs/classes.png)
 
-# Requirements
-You must have a **Docker Hub account** to build docker image and run the game.
+# Tasks before running the game
+1. Create a **Docker Hub account**.
+2. Log in your docker hub and create a new repository to store the built images.
+3. Enter ~/oop-proj-hello-mario/Docker and modify ```build.sh``` and ```docker_run.sh```
+4. If you're team leader, make sure that you let your team members know your repository so they can pull the built image.
 
 # Use Docker As Root
 First open the terminal and type
@@ -30,9 +33,9 @@ $ groups
 ```
 $ cd oop-proj-hello-mario
 ```
-然後把docker build起來並進入docker
+然後把docker build起來並進入docker ()
 ```
-$ source Docker/build.sh
+$ source Docker/build.sh 或 ./docker_build
 ```
 過程中若出現需要docker login，請使用自己的Docker Hub account登入
 
