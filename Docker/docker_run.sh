@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ARGS=("$@")
-REPO_NAME="brian247/aoop2024" # Change this to your Docker Hub username
+REPO_NAME="brian247/aoop2024" # Replace with your Docker Hub username and repository name
 TAG="hello-mario" # Change this to the tag you want to use
 IMG="${REPO_NAME}:${TAG}"
 PROJ_NAME="oop-proj-hello-mario"
