@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-REPOSITORY="brian247/aoop2024" # Change this to your Docker Hub username
-TAG="hello-mario" # Change this to the tag you want to use
+REPOSITORY="brian247/aoop2024" # Replace with your Docker Hub username and repository name
+TAG="hello-mario" # Replace with the tag you want to use. Make sure to be the same as that in docker_run.sh
 IMG="${REPOSITORY}:${TAG}"
 
 # Docker login
