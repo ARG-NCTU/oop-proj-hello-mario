@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
 ARGS=("$@")
-USER_NAME="arg"
+REPO_NAME="brian247/aoop2024" # Change this to your Docker Hub username
+TAG="hello-mario" # Change this to the tag you want to use
+IMG="${REPO_NAME}:${TAG}"
 PROJ_NAME="oop-proj-hello-mario"
+
+docker pull ${REPO_NAME}:${TAG}
 
 # Make sure processes in the container can connect to the x server
 # Necessary so gazebo can create a context for OpenGL rendering (even headless)
@@ -24,7 +28,6 @@ if [ ! -f $XAUTH ]; then
     exit 1
 fi
 
-BASH_OPTION=bash
 xhost +
 docker run \
     -it \
@@ -43,6 +46,6 @@ docker run \
     --network host \
     --privileged \
     --security-opt seccomp=unconfined \
-    argnctu/oop:hello-mario \
-    $BASH_OPTION
+    ${IMG} \
+    bash
 xhost -
