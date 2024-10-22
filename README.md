@@ -5,17 +5,18 @@
 ![Class Diagram](docs/classes.png)
 
 # Tasks before running the game
+## Team Leader
 1. Create a **Docker Hub account**.
-2. Log in your docker hub and create a new repository to store the built images.
-3. Enter ~/oop-proj-hello-mario/Docker and modify ```build.sh``` and ```docker_run.sh```
-4. If you're the team leader, enter your own docker hub account and repository. Do it for both ```build.sh``` and ```docker_run.sh```.
-5. If you're a team member, enter your team leader's docker hub account, repository and tag name **ONLY** in the ```docker_run.sh```
+2. Log in your docker hub and create a new repository to store the built images. Make sure to set it to `Public`
+3. Enter the directory `~/oop-proj-hello-mario/Docker`
+4. Enter your own docker hub account and repository in `build.sh`, `docker_run.sh` and `docker_join.sh`
+5. Let your team members know where the built image will be.
 
-| Identity | Leader | Member |
-| -------- | ------ | ------ |
-| `build.sh` | Leader user name, repository name | X (have to wait for leader to build the image) |
-| `docker_run.sh` | Leader user name, repository name | Leader user name, repository name |
-| `docker_join.sh` | Leader user name, repository name | Leader user name, repository name |
+## Team Member
+1. Create a **Docker Hub account**.
+2. Log in your docker hub.
+3. Enter the directory `~/oop-proj-hello-mario/Docker`
+3. Enter your team leader's docker hub account, repository and tag name **ONLY** in the `docker_run.sh` and `docker_join.sh`
 
 
 # Use Docker As Root
