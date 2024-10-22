@@ -8,7 +8,15 @@
 1. Create a **Docker Hub account**.
 2. Log in your docker hub and create a new repository to store the built images.
 3. Enter ~/oop-proj-hello-mario/Docker and modify ```build.sh``` and ```docker_run.sh```
-4. If you're team leader, make sure that you let your team members know your repository so they can pull the built image.
+4. If you're the team leader, enter your own docker hub account and repository. Do it for both ```build.sh``` and ```docker_run.sh```.
+5. If you're a team member, enter your team leader's docker hub account, repository and tag name **ONLY** in the ```docker_run.sh```
+
+| Identity | Leader | Member |
+| -------- | ------ | ------ |
+| `build.sh` | Leader user name, repository name | X (have to wait for leader to build the image) |
+| `docker_run.sh` | Leader user name, repository name | Leader user name, repository name |
+| `docker_join.sh` | Leader user name, repository name | Leader user name, repository name |
+
 
 # Use Docker As Root
 First open the terminal and type
@@ -29,56 +37,53 @@ $ groups
 ```
 
 # How to run the game
-首先進入repo
+First enter the repo
 ```
 $ cd oop-proj-hello-mario
 ```
-然後把docker build起來並進入docker ()
+Build the docker image first (team leader only)
 ```
-$ source Docker/build.sh 或 ./docker_build
+./docker_build
 ```
-過程中若出現需要docker login，請使用自己的Docker Hub account登入
+The process requires docker hub account. There will be messages about loggin in to docker hub account before you build the image.
 
-完成後再執行
+After the images is built and pushed to docker hub, both team leader and member can run
 ```
-$ source Docker/docker_run.sh 或 $ ./docker_run
+$ ./docker_run
 ```
-若docker已在執行中請使用
+If the docker container is in process, please run
 ```
-$ source Docker/docker_join.sh 或 $ ./docker_join
+$ ./docker_join
 ```
-進入docker後輸入下列指令即可進入遊戲:
+Run this command to enter the game after the container is running
 ```
 # python3 main.py
 ```
-若出現ALSA相關問題表示音訊設定錯誤，可嘗試輸入
+# Audio Device issue handling
+This game requires your audio device. The default is set to `hw:0,0` beforehand.
+
+If there are any error messages related to `ALSA`, please run the following command:
 ```
 # aplay -l
 ```
-看是否有正確安裝並識別音訊設備
+This command shows all your available audio devices.
 
-若音訊設備已正確安裝並被偵測到，輸入
+If you have an available audio device, run the following:
 ```
 # export AUDIODEV=hw:(#card_number),(#device_number)
 ```
-其中hw:後面的數字代表使用第(#card_number)張卡的第(#device_number)個設備
+Choose the audio device you want to use from the above list.
 
-需要依據前面`aplay -l`列出的結果來選擇
-
-例如以下：
+e.g.
 
 ![aplay example image](docs/aplay_example.png)
 
-圖中HDA Analog為筆電喇叭，則指令須輸入
+`HDA Analog` is the name of the laptop, and it's on `card 0`, `device 0`. So we enter
 ```
 # export AUDIODEV=hw:0,0
 ```
-
-輸入完成後，可以輸入以下指令來測試是否設定成功
+Test if successful by running the following command
 ```
 # speaker-test -D hw:(#card_number),(#device_number) -t wav -c 2
 ```
-有聲音的話表示音訊設備設定成功，就可以ctrl-c結束並執行遊戲
-```
-# python3 main.py
-```
+If you hear sounds playing, congratulations! You're ready to run the game.
