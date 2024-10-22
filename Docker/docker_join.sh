@@ -2,7 +2,7 @@
 
 BASH_OPTION=bash
 
-IMG=argnctu/oop:hello-mario
+IMG=brian247/aoop2024:hello-mario # Replace with the docker image you pulled
 
 xhost +
 containerid=$(docker ps -aqf "ancestor=${IMG}") && echo $containerid
