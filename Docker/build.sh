@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-REPOSITORY="argnctu/oop"
-TAG="hello-mario"
+REPOSITORY="brian247/aoop2024" # Replace with your Docker Hub username and repository name
+TAG="hello-mario" # Replace with the tag you want to use. Make sure to be the same as that in docker_run.sh
 IMG="${REPOSITORY}:${TAG}"
 
 # Docker login
@@ -48,3 +48,6 @@ echo "=================================================="
 echo "Start building image"
 
 docker buildx build --load --rm "$@" -f "${DOCKERFILE_PATH}" -t "${IMG}" "${SCRIPT_PATH}"
+
+# Push the image to Docker Hub
+docker push ${IMG}
