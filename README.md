@@ -49,17 +49,7 @@ The process requires docker hub account. There will be messages about loggin in 
 
 After the images is built and pushed to docker hub, both team leader and member can run
 ```
-<<<<<<< HEAD
-$ source Docker/build.sh
-```
-過程中若出現需要docker login，請使用自己的Docker Hub account登入
-
-完成後再執行
-```
-$ source Docker/docker_run.sh 或 $ ./docker_run
-=======
 $ ./docker_run
->>>>>>> e035f5113c246a90339516adac1367ec7a3f5a33
 ```
 If the docker container is in process, please run
 ```
