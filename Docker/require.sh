@@ -6,3 +6,5 @@ apt-get clean
 pip install --upgrade pip
 pip install seaborn
 
+export AUDIODEV=hw:0,0
+
