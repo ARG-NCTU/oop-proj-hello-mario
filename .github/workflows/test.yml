@@ -25,7 +25,7 @@ jobs:
       - name: Determine Dockerfile path
         id: determine-path
         run: |
-          DOCKERFILE_PATH="./Docker/Dockerfile"
+          DOCKERFILE_PATH="./Docker"
 
       # Step 4: Build Docker image
       - name: Build Docker image
