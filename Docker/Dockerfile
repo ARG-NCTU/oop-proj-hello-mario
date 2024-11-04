@@ -11,6 +11,8 @@ COPY . .
 
 USER root
 
-RUN chmod +x require.sh && ./require.sh
-# RUN chmod 777 /tmp/.X11-unix
+RUN ls -la /home/arg/oop-proj-hello-mario
+
+RUN chmod +x /home/arg/oop-proj-hello-mario/require.sh && .home/arg/oop-proj-hello-mario/require.sh
+
 CMD ["bash"]
