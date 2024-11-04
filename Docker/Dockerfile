@@ -13,6 +13,6 @@ USER root
 
 RUN ls -la /home/arg/oop-proj-hello-mario
 
-RUN chmod +x /home/arg/oop-proj-hello-mario/require.sh && .home/arg/oop-proj-hello-mario/require.sh
+RUN chmod +x /home/arg/oop-proj-hello-mario/Docker/require.sh && ./home/arg/oop-proj-hello-mario/Docker/require.sh
 
 CMD ["bash"]
