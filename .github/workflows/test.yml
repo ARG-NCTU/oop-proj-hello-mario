@@ -21,22 +21,16 @@ jobs:
           username: "brian247" # Docker Hub username stored in secrets
           password: "Lian238@Docker" # Docker Hub password stored in secrets
 
-      # Step 3: Determine Dockerfile path
-      - name: Determine Dockerfile path
-        id: determine-path
-        run: |
-          DOCKERFILE_PATH="Docker/Dockerfile"
-
-      # Step 4: Build Docker image
+      # Step 3: Build Docker image
       - name: Build Docker image
         run: |
           REPOSITORY="brian247/aoop2024"
           TAG="hello-mario"
           IMG="${REPOSITORY}:${TAG}"
           echo "Building Docker image with tag: ${IMG}"
-          docker buildx build --load --rm -f "$DOCKERFILE_PATH" -t "$IMG" .
+          docker buildx build --load --rm -f "Docker/Dockerfile" -t "$IMG" .
 
-      # Step 5: Push Docker image to Docker Hub
+      # Step 4: Push Docker image to Docker Hub
       - name: Push Docker image
         run: |
           REPOSITORY="brian247/aoop2024"
