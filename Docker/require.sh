@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 apt-get update
 apt-get install -y alsa-utils libasound2 libasound2-dev x11-apps
