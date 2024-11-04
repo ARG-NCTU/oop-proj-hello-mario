@@ -25,15 +25,7 @@ jobs:
       - name: Determine Dockerfile path
         id: determine-path
         run: |
-          if [ -f "./Dockerfile" ]; then
-            echo "DOCKERFILE_PATH=./Dockerfile" >> $GITHUB_ENV
-          elif [ -f "./dockerfile" ]; then
-            echo "DOCKERFILE_PATH=./dockerfile" >> $GITHUB_ENV
-          else
-            echo "Dockerfile not found. Exiting."
-            exit 1
-          fi
-          echo "Using Dockerfile at path: $DOCKERFILE_PATH"
+          DOCKERFILE_PATH="./Docker/Dockerfile"
 
       # Step 4: Build Docker image
       - name: Build Docker image
