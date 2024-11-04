@@ -1,0 +1,53 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main # Adjust this to the branch you want to trigger the workflow
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: "brian247" # Docker Hub username stored in secrets
+          password: "Lian238@Docker" # Docker Hub password stored in secrets
+
+      # Step 3: Determine Dockerfile path
+      - name: Determine Dockerfile path
+        id: determine-path
+        run: |
+          if [ -f "./Dockerfile" ]; then
+            echo "DOCKERFILE_PATH=./Dockerfile" >> $GITHUB_ENV
+          elif [ -f "./dockerfile" ]; then
+            echo "DOCKERFILE_PATH=./dockerfile" >> $GITHUB_ENV
+          else
+            echo "Dockerfile not found. Exiting."
+            exit 1
+          fi
+          echo "Using Dockerfile at path: $DOCKERFILE_PATH"
+
+      # Step 4: Build Docker image
+      - name: Build Docker image
+        run: |
+          REPOSITORY="brian247/aoop2024"
+          TAG="hello-mario"
+          IMG="${REPOSITORY}:${TAG}"
+          echo "Building Docker image with tag: ${IMG}"
+          docker buildx build --load --rm -f "$DOCKERFILE_PATH" -t "$IMG" .
+
+      # Step 5: Push Docker image to Docker Hub
+      - name: Push Docker image
+        run: |
+          REPOSITORY="brian247/aoop2024"
+          TAG="hello-mario"
+          IMG="${REPOSITORY}:${TAG}"
+          docker push "$IMG"
