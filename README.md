@@ -43,17 +43,17 @@ $ cd oop-proj-hello-mario
 ```
 Build the docker image first (team leader only)
 ```
-./docker_build
+$ source Docker/build.sh
 ```
 The process requires docker hub account. There will be messages about loggin in to docker hub account before you build the image.
 
 After the images is built and pushed to docker hub, both team leader and member can run
 ```
-$ ./docker_run
+$ source Docker/docker_run.sh
 ```
 If the docker container is in process, please run
 ```
-$ ./docker_join
+$ source Docker/docker_join.sh
 ```
 Run this command to enter the game after the container is running
 ```
