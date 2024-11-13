@@ -87,3 +87,5 @@ Test if successful by running the following command
 # speaker-test -D hw:(#card_number),(#device_number) -t wav -c 2
 ```
 If you hear sounds playing, congratulations! You're ready to run the game.
+
+This is the demo of github copilot commit message.
